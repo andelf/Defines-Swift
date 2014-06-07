@@ -31,3 +31,7 @@ protocol RawOptionSet : _RawOptionSet, LogicValue, Equatable {
 protocol _RawOptionSet : RawRepresentable {
   typealias RawType : BitwiseOperations, Equatable
 }
+
+struct _NilOptionalComparator : Equatable {
+  init()
+}
