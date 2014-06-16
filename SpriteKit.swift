@@ -73,6 +73,63 @@
   @objc deinit  {
   }
 }
+extension SKAction {
+  @objc(moveBy:duration:) class func moveBy(delta: CGVector, duration sec: NSTimeInterval) -> SKAction!
+  @objc(moveByX:y:duration:) class func moveByX(deltaX: CGFloat, y deltaY: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(moveTo:duration:) class func moveTo(location: CGPoint, duration sec: NSTimeInterval) -> SKAction!
+  @objc(moveToX:duration:) class func moveToX(x: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(moveToY:duration:) class func moveToY(y: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(rotateByAngle:duration:) class func rotateByAngle(radians: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(rotateToAngle:duration:) class func rotateToAngle(radians: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(rotateToAngle:duration:shortestUnitArc:) class func rotateToAngle(radians: CGFloat, duration sec: NSTimeInterval, shortestUnitArc: Bool) -> SKAction!
+  @objc(resizeByWidth:height:duration:) class func resizeByWidth(width: CGFloat, height: CGFloat, duration: NSTimeInterval) -> SKAction!
+  @objc(resizeToWidth:height:duration:) class func resizeToWidth(width: CGFloat, height: CGFloat, duration: NSTimeInterval) -> SKAction!
+  @objc(resizeToWidth:duration:) class func resizeToWidth(width: CGFloat, duration: NSTimeInterval) -> SKAction!
+  @objc(resizeToHeight:duration:) class func resizeToHeight(height: CGFloat, duration: NSTimeInterval) -> SKAction!
+  @objc(scaleBy:duration:) class func scaleBy(scale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(scaleXBy:y:duration:) class func scaleXBy(xScale: CGFloat, y yScale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(scaleTo:duration:) class func scaleTo(scale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(scaleXTo:y:duration:) class func scaleXTo(xScale: CGFloat, y yScale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(scaleXTo:duration:) class func scaleXTo(scale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(scaleYTo:duration:) class func scaleYTo(scale: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(sequence:) class func sequence(actions: AnyObject[]!) -> SKAction!
+  @objc(group:) class func group(actions: AnyObject[]!) -> SKAction!
+  @objc(repeatAction:count:) class func repeatAction(action: SKAction!, count: Int) -> SKAction!
+  @objc(repeatActionForever:) class func repeatActionForever(action: SKAction!) -> SKAction!
+  @objc(fadeInWithDuration:) class func fadeInWithDuration(sec: NSTimeInterval) -> SKAction!
+  @objc(fadeOutWithDuration:) class func fadeOutWithDuration(sec: NSTimeInterval) -> SKAction!
+  @objc(fadeAlphaBy:duration:) class func fadeAlphaBy(factor: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(fadeAlphaTo:duration:) class func fadeAlphaTo(alpha: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(hide) class func hide() -> SKAction!
+  @objc(unhide) class func unhide() -> SKAction!
+  @objc(setTexture:) class func setTexture(texture: SKTexture!) -> SKAction!
+  @objc(setTexture:resize:) class func setTexture(texture: SKTexture!, resize: Bool) -> SKAction!
+  @objc(animateWithTextures:timePerFrame:) class func animateWithTextures(textures: AnyObject[]!, timePerFrame sec: NSTimeInterval) -> SKAction!
+  @objc(animateWithTextures:timePerFrame:resize:restore:) class func animateWithTextures(textures: AnyObject[]!, timePerFrame sec: NSTimeInterval, resize: Bool, restore: Bool) -> SKAction!
+  @objc(playSoundFileNamed:waitForCompletion:) class func playSoundFileNamed(soundFile: String!, waitForCompletion wait: Bool) -> SKAction!
+  @objc(colorizeWithColor:colorBlendFactor:duration:) class func colorizeWithColor(color: NSColor!, colorBlendFactor: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(colorizeWithColorBlendFactor:duration:) class func colorizeWithColorBlendFactor(colorBlendFactor: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(followPath:duration:) class func followPath(path: CGPath!, duration sec: NSTimeInterval) -> SKAction!
+  @objc(followPath:asOffset:orientToPath:duration:) class func followPath(path: CGPath!, asOffset offset: Bool, orientToPath orient: Bool, duration sec: NSTimeInterval) -> SKAction!
+  @objc(followPath:speed:) class func followPath(path: CGPath!, speed: CGFloat) -> SKAction!
+  @objc(followPath:asOffset:orientToPath:speed:) class func followPath(path: CGPath!, asOffset offset: Bool, orientToPath orient: Bool, speed: CGFloat) -> SKAction!
+  @objc(speedBy:duration:) class func speedBy(speed: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(speedTo:duration:) class func speedTo(speed: CGFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(reachTo:rootNode:duration:) class func reachTo(position: CGPoint, rootNode root: SKNode!, duration sec: NSTimeInterval) -> SKAction!
+  @objc(reachTo:rootNode:velocity:) class func reachTo(position: CGPoint, rootNode root: SKNode!, velocity: CGFloat) -> SKAction!
+  @objc(reachToNode:rootNode:duration:) class func reachToNode(node: SKNode!, rootNode root: SKNode!, duration sec: NSTimeInterval) -> SKAction!
+  @objc(reachToNode:rootNode:velocity:) class func reachToNode(node: SKNode!, rootNode root: SKNode!, velocity: CGFloat) -> SKAction!
+  @objc(strengthTo:duration:) class func strengthTo(strength: CFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(strengthBy:duration:) class func strengthBy(strength: CFloat, duration sec: NSTimeInterval) -> SKAction!
+  @objc(waitForDuration:) class func waitForDuration(sec: NSTimeInterval) -> SKAction!
+  @objc(waitForDuration:withRange:) class func waitForDuration(sec: NSTimeInterval, withRange durationRange: NSTimeInterval) -> SKAction!
+  @objc(removeFromParent) class func removeFromParent() -> SKAction!
+  @availability(*, unavailable, message="'performSelector' methods are unavailable") @objc(performSelector:onTarget:) class func performSelector(selector: Selector, onTarget target: AnyObject!) -> SKAction!
+  @objc(runBlock:) class func runBlock(block: dispatch_block_t!) -> SKAction!
+  @objc(runBlock:queue:) class func runBlock(block: dispatch_block_t!, queue: dispatch_queue_t!) -> SKAction!
+  @objc(runAction:onChildWithName:) class func runAction(action: SKAction!, onChildWithName name: String!) -> SKAction!
+  @objc(customActionWithDuration:actionBlock:) class func customActionWithDuration(seconds: NSTimeInterval, actionBlock block: ((SKNode!, CGFloat) -> Void)!) -> SKAction!
+}
 enum SKActionTimingMode : Int {
   case Linear
   case EaseIn
