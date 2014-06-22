@@ -4,6 +4,8 @@ Dumped by press Command and Click module name(in import statement) in Xcode.
 
 AppKit module is only available at MACOS, not in IOS.
 
+UIKit only in IOS.
+
 ## hiden features
 
 - @transparent means inline
@@ -12,3 +14,10 @@ AppKit module is only available at MACOS, not in IOS.
 ## My Notes and Analysis
 
 [Notes](http://andelf.github.io)
+
+
+## Notes
+
+- Swift: standard library
+- SwiftShims: type compatiablity helper module
+- Darwin: /usr/include libs ( c standard library )
