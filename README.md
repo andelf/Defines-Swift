@@ -21,3 +21,8 @@ UIKit only in IOS.
 - Swift: standard library
 - SwiftShims: type compatiablity helper module
 - Darwin: /usr/include libs ( c standard library )
+
+
+## For Emacs users
+
+``dump.py`` + ``keywords.text`` makes an ``ac-user-dictionary``. :)
