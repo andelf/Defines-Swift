@@ -1,398 +1,545 @@
 @exported import Foundation
-@objc(HMAccessory) class HMAccessory : NSObject {
-  @objc var name: String! {
-    @objc(name) get {}
-  }
-  @objc var identifier: NSUUID! {
-    @objc(identifier) get {}
-  }
-  @objc var delegate: HMAccessoryDelegate! {
-    @objc(delegate) get {}
-    @objc(setDelegate:) set {}
-  }
-  @objc var reachable: Bool {
-    @objc(isReachable) get {}
-  }
-  @objc var configured: Bool {
-    @objc(isConfigured) get {}
-  }
-  @objc var bridged: Bool {
-    @objc(isBridged) get {}
-  }
-  @objc var identifiersForBridgedAccessories: AnyObject[]! {
-    @objc(identifiersForBridgedAccessories) get {}
-  }
-  @objc var room: HMRoom! {
-    @objc(room) get {}
-  }
-  @objc var services: AnyObject[]! {
-    @objc(services) get {}
-  }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
+@exported import Foundation
+@exported import Foundation
+@exported import HealthKit
+@objc(HKAnchoredObjectQuery) class HKAnchoredObjectQuery : HKQuery {
+  @objc(initWithType:predicate:anchor:limit:completionHandler:) init(type: HKSampleType!, predicate: NSPredicate!, anchor: Int, limit: Int, completionHandler handler: ((HKAnchoredObjectQuery!, AnyObject[]!, Int, NSError!) -> Void)!)
   @objc(init) init()
 }
-@objc(HMAccessoryBrowser) class HMAccessoryBrowser : NSObject {
-  @objc var delegate: HMAccessoryBrowserDelegate! {
-    @objc(delegate) get {}
-    @objc(setDelegate:) set {}
+enum HKAuthorizationStatus : Int {
+  case NotDetermined
+  case SharingDenied
+  case SharingAuthorized
+}
+enum HKBiologicalSex : Int {
+  case NotSet
+  case Female
+  case Male
+}
+@objc(HKBiologicalSexObject) class HKBiologicalSexObject : NSObject {
+  @objc var biologicalSex: HKBiologicalSex {
+    @objc(biologicalSex) get {}
   }
-  @objc var discoveredAccessories: AnyObject[]! {
-    @objc(discoveredAccessories) get {}
-  }
-  @objc(startSearchingForNewAccessories) func startSearchingForNewAccessories()
-  @objc(stopSearchingForNewAccessories) func stopSearchingForNewAccessories()
   @objc(init) init()
 }
-@objc(HMAccessoryBrowserDelegate) protocol HMAccessoryBrowserDelegate : NSObjectProtocol {
-  @objc(accessoryBrowser:didFindNewAccessory:) @optional func accessoryBrowser(browser: HMAccessoryBrowser!, didFindNewAccessory accessory: HMAccessory!)
-  @objc(accessoryBrowser:didRemoveNewAccessory:) @optional func accessoryBrowser(browser: HMAccessoryBrowser!, didRemoveNewAccessory accessory: HMAccessory!)
+enum HKBloodType : Int {
+  case NotSet
+  case APositive
+  case ANegative
+  case BPositive
+  case BNegative
+  case ABPositive
+  case ABNegative
+  case OPositive
+  case ONegative
 }
-@objc(HMAccessoryDelegate) protocol HMAccessoryDelegate : NSObjectProtocol {
-  @objc(accessoryDidUpdateName:) @optional func accessoryDidUpdateName(accessory: HMAccessory!)
-  @objc(accessory:didUpdateNameForService:) @optional func accessory(accessory: HMAccessory!, didUpdateNameForService service: HMService!)
-  @objc(accessoryDidUpdateServices:) @optional func accessoryDidUpdateServices(accessory: HMAccessory!)
-  @objc(accessoryDidUpdateReachability:) @optional func accessoryDidUpdateReachability(accessory: HMAccessory!)
-  @objc(accessory:service:didUpdateValueForCharacteristic:) @optional func accessory(accessory: HMAccessory!, service: HMService!, didUpdateValueForCharacteristic characteristic: HMCharacteristic!)
-}
-@objc(HMAction) class HMAction : NSObject {
+@objc(HKBloodTypeObject) class HKBloodTypeObject : NSObject {
+  @objc var bloodType: HKBloodType {
+    @objc(bloodType) get {}
+  }
   @objc(init) init()
 }
-@objc(HMActionSet) class HMActionSet : NSObject {
-  @availability(*, unavailable) @objc(init) init()
-  @objc var name: String! {
-    @objc(name) get {}
-  }
-  @objc var actions: NSSet! {
-    @objc(actions) get {}
-  }
-  @objc var executing: Bool {
-    @objc(isExecuting) get {}
-  }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(addAction:completionHandler:) func addAction(action: HMAction!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(removeAction:completionHandler:) func removeAction(action: HMAction!, completionHandler completion: ((NSError!) -> Void)!)
+enum HKBodyTemperatureSensorLocation : Int {
+  case Other
+  case Armpit
+  case Body
+  case Ear
+  case Finger
+  case GastroIntestinal
+  case Mouth
+  case Rectum
+  case Toe
+  case EarDrum
+  case TemporalArtery
+  case Forehead
 }
-var HMActionSetExecutionFailedActionKey: NSString!
-@objc(HMCharacteristic) class HMCharacteristic : NSObject {
-  @objc var characteristicType: String! {
-    @objc(characteristicType) get {}
+@objc(HKCategorySample) class HKCategorySample : HKSample {
+  @objc var categoryType: HKCategoryType! {
+    @objc(categoryType) get {}
   }
-  @objc var service: HMService! {
-    @objc(service) get {}
-  }
-  @objc var properties: AnyObject[]! {
-    @objc(properties) get {}
-  }
-  @objc var metadata: HMCharacteristicMetadata! {
-    @objc(metadata) get {}
-  }
-  @objc var value: AnyObject! {
+  @objc var value: Int {
     @objc(value) get {}
   }
-  @objc var notificationEnabled: Bool {
-    @objc(isNotificationEnabled) get {}
+  @availability(*, unavailable) @objc(init) init()
+  @objc(categorySampleWithType:value:startDate:endDate:metadata:) convenience init(type: HKCategoryType!, value: Int, startDate: NSDate!, endDate: NSDate!, metadata: NSDictionary!)
+  @availability(*, unavailable, message="use object construction 'HKCategorySample(type:value:startDate:endDate:metadata:)'") @objc(categorySampleWithType:value:startDate:endDate:metadata:) class func categorySampleWithType(type: HKCategoryType!, value: Int, startDate: NSDate!, endDate: NSDate!, metadata: NSDictionary!) -> Self!
+  @objc(categorySampleWithType:value:startDate:endDate:) convenience init(type: HKCategoryType!, value: Int, startDate: NSDate!, endDate: NSDate!)
+  @availability(*, unavailable, message="use object construction 'HKCategorySample(type:value:startDate:endDate:)'") @objc(categorySampleWithType:value:startDate:endDate:) class func categorySampleWithType(type: HKCategoryType!, value: Int, startDate: NSDate!, endDate: NSDate!) -> Self!
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+@objc(HKCategoryType) class HKCategoryType : HKSampleType {
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+var HKCategoryTypeIdentifierSleepAnalysis: NSString!
+enum HKCategoryValueSleepAnalysis : Int {
+  case InBed
+  case Asleep
+}
+@objc(HKCharacteristicType) class HKCharacteristicType : HKObjectType {
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+var HKCharacteristicTypeIdentifierBiologicalSex: NSString!
+var HKCharacteristicTypeIdentifierBloodType: NSString!
+var HKCharacteristicTypeIdentifierDateOfBirth: NSString!
+@objc(HKCorrelation) class HKCorrelation : HKObject, NSSecureCoding, NSCoding {
+  @objc var objects: NSSet! {
+    @objc(objects) get {}
   }
-  @objc(writeValue:completionHandler:) func writeValue(value: AnyObject!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(readValueWithCompletionHandler:) func readValueWithCompletionHandler(completion: ((NSError!) -> Void)!)
-  @objc(enableNotification:completionHandler:) func enableNotification(enable: Bool, completionHandler completion: ((NSError!) -> Void)!)
+  @objc(correlationWithObjects:) convenience init(objects: NSSet!)
+  @availability(*, unavailable, message="use object construction 'HKCorrelation(objects:)'") @objc(correlationWithObjects:) class func correlationWithObjects(objects: NSSet!) -> Self!
+  @objc(correlationWithObjects:metadata:) convenience init(objects: NSSet!, metadata: NSDictionary!)
+  @availability(*, unavailable, message="use object construction 'HKCorrelation(objects:metadata:)'") @objc(correlationWithObjects:metadata:) class func correlationWithObjects(objects: NSSet!, metadata: NSDictionary!) -> Self!
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+@objc(HKCorrelationQuery) class HKCorrelationQuery : HKQuery {
+  @objc var types: AnyObject[]! {
+    @objc(types) get {}
+  }
+  @objc var samplePredicate: NSPredicate! {
+    @objc(samplePredicate) get {}
+  }
+  @objc(initWithTypes:predicate:samplePredicate:completion:) init(types: AnyObject[]!, predicate: NSPredicate!, samplePredicate: NSPredicate!, completion: ((HKCorrelationQuery!, AnyObject[]!, NSError!) -> Void)!)
   @objc(init) init()
 }
-@objc(HMCharacteristicMetadata) class HMCharacteristicMetadata : NSObject {
-  @objc var minimumValue: NSNumber! {
-    @objc(minimumValue) get {}
-  }
-  @objc var maximumValue: NSNumber! {
-    @objc(maximumValue) get {}
-  }
-  @objc var stepValue: NSNumber! {
-    @objc(stepValue) get {}
-  }
-  @objc var precision: NSNumber! {
-    @objc(precision) get {}
-  }
-  @objc var maxLength: NSNumber! {
-    @objc(maxLength) get {}
-  }
-  @objc var format: String! {
-    @objc(format) get {}
-  }
-  @objc var units: String! {
-    @objc(units) get {}
-  }
-  @objc var manufacturerDescription: String! {
-    @objc(manufacturerDescription) get {}
-  }
+enum HKErrorCode : Int {
+  case NoError
+  case ErrorHealthDataUnavailable
+  case ErrorInvalidArgument
+  case ErrorAuthorizationDenied
+  case ErrorAuthorizationNotDetermined
+  case ErrorDatabaseInaccessible
+}
+var HKErrorDomain: NSString!
+@objc(HKHealthStore) class HKHealthStore : NSObject {
+  @objc(isHealthDataAvailable) class func isHealthDataAvailable() -> Bool
+  @objc(authorizationStatusForType:) func authorizationStatusForType(type: HKObjectType!) -> HKAuthorizationStatus
+  @objc(requestAuthorizationToShareTypes:readTypes:completion:) func requestAuthorizationToShareTypes(typesToShare: NSSet!, readTypes typesToRead: NSSet!, completion: ((Bool, NSError!) -> Void)!)
+  @objc(saveObject:withCompletion:) func saveObject(object: HKObject!, withCompletion completion: ((Bool, NSError!) -> Void)!)
+  @objc(saveObjects:withCompletion:) func saveObjects(objects: AnyObject[]!, withCompletion completion: ((Bool, NSError!) -> Void)!)
+  @objc(deleteObject:withCompletion:) func deleteObject(object: HKObject!, withCompletion completion: ((Bool, NSError!) -> Void)!)
+  @objc(executeQuery:) func executeQuery(query: HKQuery!)
+  @objc(stopQuery:) func stopQuery(query: HKQuery!)
+  @objc(dateOfBirthWithError:) func dateOfBirthWithError(error: NSErrorPointer) -> NSDate!
+  @objc(biologicalSexWithError:) func biologicalSexWithError(error: NSErrorPointer) -> HKBiologicalSexObject!
+  @objc(bloodTypeWithError:) func bloodTypeWithError(error: NSErrorPointer) -> HKBloodTypeObject!
   @objc(init) init()
 }
-var HMCharacteristicMetadataFormatArray: NSString!
-var HMCharacteristicMetadataFormatBool: NSString!
-var HMCharacteristicMetadataFormatFloat: NSString!
-var HMCharacteristicMetadataFormatInt: NSString!
-var HMCharacteristicMetadataFormatObject: NSString!
-var HMCharacteristicMetadataFormatString: NSString!
-var HMCharacteristicMetadataUnitsArcDegree: NSString!
-var HMCharacteristicMetadataUnitsCelsius: NSString!
-var HMCharacteristicMetadataUnitsFahrenheit: NSString!
-var HMCharacteristicMetadataUnitsPercentage: NSString!
-var HMCharacteristicPropertyReadable: NSString!
-var HMCharacteristicPropertySupportsBonjourNotification: NSString!
-var HMCharacteristicPropertySupportsChangeNumber: NSString!
-var HMCharacteristicPropertySupportsEventNotification: NSString!
-var HMCharacteristicPropertyWritable: NSString!
-var HMCharacteristicTypeBrightness: NSString!
-var HMCharacteristicTypeCurrentDoorState: NSString!
-var HMCharacteristicTypeCurrentHeatingCooling: NSString!
-var HMCharacteristicTypeCurrentRelativeHumidity: NSString!
-var HMCharacteristicTypeCurrentTemperature: NSString!
-var HMCharacteristicTypeHue: NSString!
-var HMCharacteristicTypeIdentify: NSString!
-var HMCharacteristicTypeLocked: NSString!
-var HMCharacteristicTypeManufacturer: NSString!
-var HMCharacteristicTypeModel: NSString!
-var HMCharacteristicTypeName: NSString!
-var HMCharacteristicTypeObstructionDetected: NSString!
-var HMCharacteristicTypePowerState: NSString!
-var HMCharacteristicTypeSaturation: NSString!
-var HMCharacteristicTypeSerialNumber: NSString!
-var HMCharacteristicTypeTargetDoorState: NSString!
-var HMCharacteristicTypeTargetHeatingCooling: NSString!
-var HMCharacteristicTypeTargetRelativeHumidity: NSString!
-var HMCharacteristicTypeTargetTemperature: NSString!
-var HMCharacteristicTypeTemperatureUnits: NSString!
-var HMCharacteristicValueDoorStateClosed: NSString!
-var HMCharacteristicValueDoorStateClosing: NSString!
-var HMCharacteristicValueDoorStateOpen: NSString!
-var HMCharacteristicValueDoorStateOpening: NSString!
-var HMCharacteristicValueDoorStateStopped: NSString!
-var HMCharacteristicValueHeatingCoolingAuto: NSString!
-var HMCharacteristicValueHeatingCoolingCool: NSString!
-var HMCharacteristicValueHeatingCoolingHeat: NSString!
-var HMCharacteristicValueHeatingCoolingOff: NSString!
-@objc(HMCharacteristicWriteAction) class HMCharacteristicWriteAction : HMAction {
-  @availability(*, unavailable) @objc(init) convenience init()
-  @objc(initWithCharacteristic:targetValue:) init(characteristic: HMCharacteristic!, targetValue: AnyObject!)
-  @objc var characteristic: HMCharacteristic! {
-    @objc(characteristic) get {}
-  }
-  @objc var targetValue: AnyObject! {
-    @objc(targetValue) get {}
-  }
-  @objc(updateTargetValue:completionHandler:) func updateTargetValue(targetValue: AnyObject!, completionHandler completion: ((NSError!) -> Void)!)
+enum HKHeartRateSensorLocation : Int {
+  case Other
+  case Chest
+  case Wrist
+  case Finger
+  case Hand
+  case EarLobe
+  case Foot
 }
-enum HMError : Int {
-  case AlreadyExists
-  case NotFound
-  case InvalidParameter
-  case AccessoryNotReachable
-  case ReadonlyCharacterisitic
-  case WriteOnlyCharacterisitic
-  case NotificationNotSupported
-  case OperationTimedOut
-  case AccessoryPoweredOff
-  case AccessDenied
-  case ObjectAssociatedToAnotherHome
-  case ObjectNotAssociatedToAnyHome
-  case ObjectAlreadyAssociatedToHome
-  case AccessoryIsBusy
-  case OperationInProgress
-  case AccessoryOutOfResources
-  case InsufficientPrivileges
-  case AccessoryPairingFailed
-  case InvalidDataFormatSpecified
-  case NilParameter
-  case UnconfiguredParameter
-  case InvalidClass
-  case OperationCancelled
-  case RoomForHomeCannotBeInZone
-  case NoActionsInActionSet
-  case NoRegisteredActionSets
-  case MissingParameter
-  case FireDateInPast
-  case RoomForHomeCannotBeUpdated
-  case ActionInAnotherActionSet
-  case ObjectWithSimilarNameExistsInHome
-  case HomeWithSimilarNameExists
-  case RenameWithSimilarName
-  case CannotRemoveNonBridgeAccessory
-  case NameContainsProhibitedCharacters
-  case NameDoesNotStartWithValidCharacters
-  case InvalidUserAccountSpecified
-  case UnableToContactUser
-  case UserDeclinedAddingUser
-  case UserDeclinedRemovingUser
-  case UserDeclinedInvite
-  case RecurrenceTooSmall
-  case InvalidValueType
-  case ValueLowerThanMinimum
-  case ValueHigherThanMaximum
-  case StringLongerThanMaximum
-  case HomeAccessNotAuthorized
-  case OperationNotSupported
+var HKMetadataKeyBodyTemperatureSensorLocation: NSString!
+var HKMetadataKeyDeviceSerialNumber: NSString!
+var HKMetadataKeyDigitalSignature: NSString!
+var HKMetadataKeyFoodType: NSString!
+var HKMetadataKeyHeartRateSensorLocation: NSString!
+var HKMetadataKeyUDIDeviceIdentifier: NSString!
+var HKMetadataKeyUDIProductionIdentifier: NSString!
+enum HKMetricPrefix : Int {
+  case None
+  case Pico
+  case Nano
+  case Micro
+  case Milli
+  case Centi
+  case Deci
+  case Deca
+  case Hecto
+  case Kilo
+  case Mega
+  case Giga
+  case Tera
 }
-var HMErrorDomain: NSString!
-@objc(HMHome) class HMHome : NSObject {
+@objc(HKObject) class HKObject : NSObject, NSSecureCoding, NSCoding {
+  @objc var UUID: NSUUID! {
+    @objc(UUID) get {}
+  }
+  @objc var source: HKSource! {
+    @objc(source) get {}
+  }
+  @objc var metadata: NSDictionary! {
+    @objc(metadata) get {}
+  }
   @availability(*, unavailable) @objc(init) init()
-  @objc var delegate: HMHomeDelegate! {
-    @objc(delegate) get {}
-    @objc(setDelegate:) set {}
-  }
-  @objc var name: String! {
-    @objc(name) get {}
-  }
-  @objc var primary: Bool {
-    @objc(isPrimary) get {}
-  }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
 }
-@objc(HMHomeDelegate) protocol HMHomeDelegate : NSObjectProtocol {
-  @objc(homeDidUpdateName:) @optional func homeDidUpdateName(home: HMHome!)
-  @objc(home:didAddAccessory:) @optional func home(home: HMHome!, didAddAccessory accessory: HMAccessory!)
-  @objc(home:didRemoveAccessory:) @optional func home(home: HMHome!, didRemoveAccessory accessory: HMAccessory!)
-  @objc(home:didAddUser:) @optional func home(home: HMHome!, didAddUser userID: String!)
-  @objc(home:didRemoveUser:) @optional func home(home: HMHome!, didRemoveUser userID: String!)
-  @objc(home:didUpdateRoom:forAccessory:) @optional func home(home: HMHome!, didUpdateRoom room: HMRoom!, forAccessory accessory: HMAccessory!)
-  @objc(home:didAddRoom:) @optional func home(home: HMHome!, didAddRoom room: HMRoom!)
-  @objc(home:didRemoveRoom:) @optional func home(home: HMHome!, didRemoveRoom room: HMRoom!)
-  @objc(home:didUpdateNameForRoom:) @optional func home(home: HMHome!, didUpdateNameForRoom room: HMRoom!)
-  @objc(home:didAddZone:) @optional func home(home: HMHome!, didAddZone zone: HMZone!)
-  @objc(home:didRemoveZone:) @optional func home(home: HMHome!, didRemoveZone zone: HMZone!)
-  @objc(home:didUpdateNameForZone:) @optional func home(home: HMHome!, didUpdateNameForZone zone: HMZone!)
-  @objc(home:didAddRoom:toZone:) @optional func home(home: HMHome!, didAddRoom room: HMRoom!, toZone zone: HMZone!)
-  @objc(home:didRemoveRoom:fromZone:) @optional func home(home: HMHome!, didRemoveRoom room: HMRoom!, fromZone zone: HMZone!)
-  @objc(home:didAddServiceGroup:) @optional func home(home: HMHome!, didAddServiceGroup group: HMServiceGroup!)
-  @objc(home:didRemoveServiceGroup:) @optional func home(home: HMHome!, didRemoveServiceGroup group: HMServiceGroup!)
-  @objc(home:didUpdateNameForServiceGroup:) @optional func home(home: HMHome!, didUpdateNameForServiceGroup group: HMServiceGroup!)
-  @objc(home:didAddService:toServiceGroup:) @optional func home(home: HMHome!, didAddService service: HMService!, toServiceGroup group: HMServiceGroup!)
-  @objc(home:didRemoveService:fromServiceGroup:) @optional func home(home: HMHome!, didRemoveService service: HMService!, fromServiceGroup group: HMServiceGroup!)
-  @objc(home:didAddActionSet:) @optional func home(home: HMHome!, didAddActionSet actionSet: HMActionSet!)
-  @objc(home:didRemoveActionSet:) @optional func home(home: HMHome!, didRemoveActionSet actionSet: HMActionSet!)
-  @objc(home:didStartExecutingActionSet:forTrigger:) @optional func home(home: HMHome!, didStartExecutingActionSet actionSet: HMActionSet!, forTrigger trigger: HMTrigger!)
-  @objc(home:didStopExecutingActionSet:error:) @optional func home(home: HMHome!, didStopExecutingActionSet actionSet: HMActionSet!, error: NSError!)
-  @objc(home:didUpdateNameForActionSet:) @optional func home(home: HMHome!, didUpdateNameForActionSet actionSet: HMActionSet!)
-  @objc(home:didUpdateActionsForActionSet:) @optional func home(home: HMHome!, didUpdateActionsForActionSet actionSet: HMActionSet!)
-  @objc(home:didAddTrigger:) @optional func home(home: HMHome!, didAddTrigger trigger: HMTrigger!)
-  @objc(home:didRemoveTrigger:) @optional func home(home: HMHome!, didRemoveTrigger trigger: HMTrigger!)
-  @objc(home:didUpdateNameForTrigger:) @optional func home(home: HMHome!, didUpdateNameForTrigger trigger: HMTrigger!)
-  @objc(home:didUpdateTrigger:) @optional func home(home: HMHome!, didUpdateTrigger trigger: HMTrigger!)
+@objc(HKObjectType) class HKObjectType : NSObject, NSSecureCoding, NSCoding, NSCopying {
+  @objc var identifier: String! {
+    @objc(identifier) get {}
+  }
+  @availability(*, unavailable) @objc(init) init()
+  @objc(quantityTypeForIdentifier:) class func quantityTypeForIdentifier(identifier: String!) -> HKQuantityType!
+  @objc(categoryTypeForIdentifier:) class func categoryTypeForIdentifier(identifier: String!) -> HKCategoryType!
+  @objc(characteristicTypeForIdentifier:) class func characteristicTypeForIdentifier(identifier: String!) -> HKCharacteristicType!
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+  @objc(copyWithZone:) func copyWithZone(zone: NSZone) -> AnyObject!
 }
-@objc(HMHomeManager) class HMHomeManager : NSObject {
-  @objc var delegate: HMHomeManagerDelegate! {
-    @objc(delegate) get {}
-    @objc(setDelegate:) set {}
-  }
-  @objc var primaryHome: HMHome! {
-    @objc(primaryHome) get {}
-  }
-  @objc var homes: AnyObject[]! {
-    @objc(homes) get {}
-  }
-  @objc(updatePrimaryHome:completionHandler:) func updatePrimaryHome(home: HMHome!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(addHomeWithName:completionHandler:) func addHomeWithName(homeName: String!, completionHandler completion: ((HMHome!, NSError!) -> Void)!)
-  @objc(removeHome:completionHandler:) func removeHome(home: HMHome!, completionHandler completion: ((NSError!) -> Void)!)
+@objc(HKObserverQuery) class HKObserverQuery : HKQuery {
+  @objc(initWithSampleType:predicate:updateHandler:) init(sampleType: HKSampleType!, predicate: NSPredicate!, updateHandler: ((HKObserverQuery!, HKObserverQueryCompletionHandler!, NSError!) -> Void)!)
   @objc(init) init()
 }
-@objc(HMHomeManagerDelegate) protocol HMHomeManagerDelegate : NSObjectProtocol {
-  @objc(homeManagerDidUpdateHomes:) @optional func homeManagerDidUpdateHomes(manager: HMHomeManager!)
-  @objc(homeManagerDidUpdatePrimaryHome:) @optional func homeManagerDidUpdatePrimaryHome(manager: HMHomeManager!)
-  @objc(homeManager:didAddHome:) @optional func homeManager(manager: HMHomeManager!, didAddHome home: HMHome!)
-  @objc(homeManager:didRemoveHome:) @optional func homeManager(manager: HMHomeManager!, didRemoveHome home: HMHome!)
-}
-enum HMHomeUserPrivilege : UInt {
-  case Regular
-  case Administrator
-}
-@objc(HMRoom) class HMRoom : NSObject {
+typealias HKObserverQueryCompletionHandler = @objc_block () -> Void
+var HKPredicateKeyPathCategoryValue: NSString!
+var HKPredicateKeyPathEndDate: NSString!
+var HKPredicateKeyPathMetadata: NSString!
+var HKPredicateKeyPathQuantity: NSString!
+var HKPredicateKeyPathSource: NSString!
+var HKPredicateKeyPathStartDate: NSString!
+@objc(HKQuantity) class HKQuantity : NSObject, NSSecureCoding, NSCoding, NSCopying {
   @availability(*, unavailable) @objc(init) init()
-  @objc var name: String! {
-    @objc(name) get {}
-  }
-  @objc var accessories: AnyObject[]! {
-    @objc(accessories) get {}
-  }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
+  @objc(quantityWithUnit:doubleValue:) convenience init(unit: HKUnit!, doubleValue value: CDouble)
+  @availability(*, unavailable, message="use object construction 'HKQuantity(unit:doubleValue:)'") @objc(quantityWithUnit:doubleValue:) class func quantityWithUnit(unit: HKUnit!, doubleValue value: CDouble) -> Self!
+  @objc(isCompatibleWithUnit:) func isCompatibleWithUnit(unit: HKUnit!) -> Bool
+  @objc(doubleValueForUnit:) func doubleValueForUnit(unit: HKUnit!) -> CDouble
+  @objc(compare:) func compare(quantity: HKQuantity!) -> NSComparisonResult
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+  @objc(copyWithZone:) func copyWithZone(zone: NSZone) -> AnyObject!
 }
-@objc(HMService) class HMService : NSObject {
-  @objc var accessory: HMAccessory! {
-    @objc(accessory) get {}
+enum HKQuantityAggregationStyle : Int {
+  case Cumulative
+  case Discrete
+}
+@objc(HKQuantitySample) class HKQuantitySample : HKSample {
+  @objc var quantityType: HKQuantityType! {
+    @objc(quantityType) get {}
   }
-  @objc var serviceType: String! {
-    @objc(serviceType) get {}
+  @objc var quantity: HKQuantity! {
+    @objc(quantity) get {}
   }
-  @objc var name: String! {
-    @objc(name) get {}
+  @objc(quantitySampleWithType:quantity:startDate:endDate:) convenience init(type quantityType: HKQuantityType!, quantity: HKQuantity!, startDate: NSDate!, endDate: NSDate!)
+  @availability(*, unavailable, message="use object construction 'HKQuantitySample(type:quantity:startDate:endDate:)'") @objc(quantitySampleWithType:quantity:startDate:endDate:) class func quantitySampleWithType(quantityType: HKQuantityType!, quantity: HKQuantity!, startDate: NSDate!, endDate: NSDate!) -> Self!
+  @objc(quantitySampleWithType:quantity:startDate:endDate:metadata:) convenience init(type quantityType: HKQuantityType!, quantity: HKQuantity!, startDate: NSDate!, endDate: NSDate!, metadata: NSDictionary!)
+  @availability(*, unavailable, message="use object construction 'HKQuantitySample(type:quantity:startDate:endDate:metadata:)'") @objc(quantitySampleWithType:quantity:startDate:endDate:metadata:) class func quantitySampleWithType(quantityType: HKQuantityType!, quantity: HKQuantity!, startDate: NSDate!, endDate: NSDate!, metadata: NSDictionary!) -> Self!
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+@objc(HKQuantityType) class HKQuantityType : HKSampleType {
+  @objc var aggregationStyle: HKQuantityAggregationStyle {
+    @objc(aggregationStyle) get {}
   }
-  @objc var characteristics: AnyObject[]! {
-    @objc(characteristics) get {}
+  @objc(isCompatibleWithUnit:) func isCompatibleWithUnit(unit: HKUnit!) -> Bool
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+var HKQuantityTypeIdentifierActiveEnergyBurned: NSString!
+var HKQuantityTypeIdentifierActivityCount: NSString!
+var HKQuantityTypeIdentifierBasalEnergyBurned: NSString!
+var HKQuantityTypeIdentifierBloodAlcoholContent: NSString!
+var HKQuantityTypeIdentifierBloodGlucose: NSString!
+var HKQuantityTypeIdentifierBloodPressureDiastolic: NSString!
+var HKQuantityTypeIdentifierBloodPressureSystolic: NSString!
+var HKQuantityTypeIdentifierBodyFatPercentage: NSString!
+var HKQuantityTypeIdentifierBodyMass: NSString!
+var HKQuantityTypeIdentifierBodyMassIndex: NSString!
+var HKQuantityTypeIdentifierBodyTemperature: NSString!
+var HKQuantityTypeIdentifierDietaryBiotin: NSString!
+var HKQuantityTypeIdentifierDietaryCalcium: NSString!
+var HKQuantityTypeIdentifierDietaryCalories: NSString!
+var HKQuantityTypeIdentifierDietaryCarbohydrates: NSString!
+var HKQuantityTypeIdentifierDietaryChloride: NSString!
+var HKQuantityTypeIdentifierDietaryCholesterol: NSString!
+var HKQuantityTypeIdentifierDietaryChromium: NSString!
+var HKQuantityTypeIdentifierDietaryCopper: NSString!
+var HKQuantityTypeIdentifierDietaryEnergyConsumed: NSString!
+var HKQuantityTypeIdentifierDietaryFatMonounsaturated: NSString!
+var HKQuantityTypeIdentifierDietaryFatPolyunsaturated: NSString!
+var HKQuantityTypeIdentifierDietaryFatSaturated: NSString!
+var HKQuantityTypeIdentifierDietaryFatTotal: NSString!
+var HKQuantityTypeIdentifierDietaryFiber: NSString!
+var HKQuantityTypeIdentifierDietaryFolate: NSString!
+var HKQuantityTypeIdentifierDietaryIodine: NSString!
+var HKQuantityTypeIdentifierDietaryIron: NSString!
+var HKQuantityTypeIdentifierDietaryMagnesium: NSString!
+var HKQuantityTypeIdentifierDietaryManganese: NSString!
+var HKQuantityTypeIdentifierDietaryMolybdenum: NSString!
+var HKQuantityTypeIdentifierDietaryNiacin: NSString!
+var HKQuantityTypeIdentifierDietaryPantothenicAcid: NSString!
+var HKQuantityTypeIdentifierDietaryPhosphorus: NSString!
+var HKQuantityTypeIdentifierDietaryPotassium: NSString!
+var HKQuantityTypeIdentifierDietaryProtein: NSString!
+var HKQuantityTypeIdentifierDietaryRiboflavin: NSString!
+var HKQuantityTypeIdentifierDietarySelenium: NSString!
+var HKQuantityTypeIdentifierDietarySodium: NSString!
+var HKQuantityTypeIdentifierDietarySugar: NSString!
+var HKQuantityTypeIdentifierDietaryThiamin: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminA: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminB12: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminB6: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminC: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminD: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminE: NSString!
+var HKQuantityTypeIdentifierDietaryVitaminK: NSString!
+var HKQuantityTypeIdentifierDietaryZinc: NSString!
+var HKQuantityTypeIdentifierDistance: NSString!
+var HKQuantityTypeIdentifierFlightsClimbed: NSString!
+var HKQuantityTypeIdentifierGalvanicSkinResponse: NSString!
+var HKQuantityTypeIdentifierHeartRate: NSString!
+var HKQuantityTypeIdentifierHeatFlux: NSString!
+var HKQuantityTypeIdentifierHeight: NSString!
+var HKQuantityTypeIdentifierInhalerUsage: NSString!
+var HKQuantityTypeIdentifierLeanBodyMass: NSString!
+var HKQuantityTypeIdentifierNikeFuel: NSString!
+var HKQuantityTypeIdentifierNumberOfTimesFallen: NSString!
+var HKQuantityTypeIdentifierOxygenSaturation: NSString!
+var HKQuantityTypeIdentifierPerfusionIndex: NSString!
+var HKQuantityTypeIdentifierRRInterval: NSString!
+var HKQuantityTypeIdentifierRespiratoryRate: NSString!
+var HKQuantityTypeIdentifierStepCount: NSString!
+@objc(HKQuery) class HKQuery : NSObject {
+  @objc var sampleType: HKSampleType! {
+    @objc(sampleType) get {}
   }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
+  @objc var predicate: NSPredicate! {
+    @objc(predicate) get {}
+  }
+  @availability(*, unavailable) @objc(init) init()
+}
+struct HKQueryOptions : RawOptionSet {
+  init() {
+
+  }
+  init(_ value: UInt) {
+
+  }
+  var value: UInt
+  static var None: HKQueryOptions {
+    get {
+      return
+    }
+  }
+  static var StrictStartDate: HKQueryOptions {
+    get {
+      return
+    }
+  }
+  static var StrictEndDate: HKQueryOptions {
+    get {
+      return
+    }
+  }
+  static func fromMask(raw: UInt) -> HKQueryOptions {
+    return
+  }
+  static func fromRaw(raw: UInt) -> HKQueryOptions? {
+    return
+  }
+  func toRaw() -> UInt {
+    return
+  }
+  func getLogicValue() -> Bool {
+    return
+  }
+}
+@objc(HKSample) class HKSample : HKObject {
+  @objc var sampleType: HKSampleType! {
+    @objc(sampleType) get {}
+  }
+  @objc var startDate: NSDate! {
+    @objc(startDate) get {}
+  }
+  @objc var endDate: NSDate! {
+    @objc(endDate) get {}
+  }
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+@objc(HKSampleQuery) class HKSampleQuery : HKQuery {
+  @objc var limit: Int {
+    @objc(limit) get {}
+  }
+  @objc var sortDescriptors: AnyObject[]! {
+    @objc(sortDescriptors) get {}
+  }
+  @objc(initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:) init(sampleType: HKSampleType!, predicate: NSPredicate!, limit: Int, sortDescriptors: AnyObject[]!, resultsHandler: ((HKSampleQuery!, AnyObject[]!, NSError!) -> Void)!)
   @objc(init) init()
 }
-@objc(HMServiceGroup) class HMServiceGroup : NSObject {
-  @availability(*, unavailable) @objc(init) init()
+var HKSampleSortIdentifierEndDate: NSString!
+var HKSampleSortIdentifierStartDate: NSString!
+@objc(HKSampleType) class HKSampleType : HKObjectType {
+  @objc(init) init()
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+@objc(HKSource) class HKSource : NSObject, NSSecureCoding, NSCoding, NSCopying {
   @objc var name: String! {
     @objc(name) get {}
   }
-  @objc var services: AnyObject[]! {
-    @objc(services) get {}
+  @objc var bundleIdentifier: String! {
+    @objc(bundleIdentifier) get {}
   }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(addService:completionHandler:) func addService(service: HMService!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(removeService:completionHandler:) func removeService(service: HMService!, completionHandler completion: ((NSError!) -> Void)!)
-}
-var HMServiceTypeAccessoryInformation: NSString!
-var HMServiceTypeGarageDoorOpener: NSString!
-var HMServiceTypeLightbulb: NSString!
-var HMServiceTypeLock: NSString!
-var HMServiceTypeSwitch: NSString!
-var HMServiceTypeThermostat: NSString!
-@objc(HMTimerTrigger) class HMTimerTrigger : HMTrigger {
-  @availability(*, unavailable) @objc(init) convenience init()
-  @objc(initWithName:fireDate:timeZone:recurrence:recurrenceCalendar:) init(name: String!, fireDate: NSDate!, timeZone: NSTimeZone!, recurrence: NSDateComponents!, recurrenceCalendar: NSCalendar!)
-  @objc var fireDate: NSDate! {
-    @objc(fireDate) get {}
-  }
-  @objc var timeZone: NSTimeZone! {
-    @objc(timeZone) get {}
-  }
-  @objc var recurrence: NSDateComponents! {
-    @objc(recurrence) get {}
-  }
-  @objc var recurrenceCalendar: NSCalendar! {
-    @objc(recurrenceCalendar) get {}
-  }
-  @objc var lastFireDate: NSDate! {
-    @objc(lastFireDate) get {}
-  }
-  @objc(updateFireDate:completionHandler:) func updateFireDate(fireDate: NSDate!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(updateTimeZone:completionHandler:) func updateTimeZone(timeZone: NSTimeZone!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(updateRecurrence:completionHandler:) func updateRecurrence(recurrence: NSDateComponents!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(updateRecurrenceCalendar:completionHandler:) func updateRecurrenceCalendar(recurrenceCalendar: NSCalendar!, completionHandler completion: ((NSError!) -> Void)!)
-}
-@objc(HMTrigger) class HMTrigger : NSObject {
+  @objc(defaultSource) class func defaultSource() -> HKSource!
   @availability(*, unavailable) @objc(init) init()
-  @objc var name: String! {
-    @objc(name) get {}
-  }
-  @objc var enabled: Bool {
-    @objc(isEnabled) get {}
-  }
-  @objc var actionSets: AnyObject[]! {
-    @objc(actionSets) get {}
-  }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(addActionSet:completionHandler:) func addActionSet(actionSet: HMActionSet!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(removeActionSet:completionHandler:) func removeActionSet(actionSet: HMActionSet!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(enable:completionHandler:) func enable(enable: Bool, completionHandler completion: ((NSError!) -> Void)!)
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+  @objc(copyWithZone:) func copyWithZone(zone: NSZone) -> AnyObject!
 }
-@objc(HMZone) class HMZone : NSObject {
+@objc(HKSourceQuery) class HKSourceQuery : HKQuery {
+  @objc(initWithSampleType:samplePredicate:completionHandler:) init(sampleType: HKSampleType!, samplePredicate objectPredicate: NSPredicate!, completionHandler: ((HKSourceQuery!, NSSet!, NSError!) -> Void)!)
+  @objc(init) init()
+}
+@objc(HKStatistics) class HKStatistics : NSObject, NSSecureCoding, NSCoding, NSCopying {
+  @objc var quantityType: HKQuantityType! {
+    @objc(quantityType) get {}
+  }
+  @objc var startDate: NSDate! {
+    @objc(startDate) get {}
+  }
+  @objc var endDate: NSDate! {
+    @objc(endDate) get {}
+  }
+  @objc var sources: AnyObject[]! {
+    @objc(sources) get {}
+  }
   @availability(*, unavailable) @objc(init) init()
-  @objc var name: String! {
-    @objc(name) get {}
+  @objc(averageQuantityForSource:) func averageQuantityForSource(source: HKSource!) -> HKQuantity!
+  @objc(averageQuantity) func averageQuantity() -> HKQuantity!
+  @objc(minimumQuantityForSource:) func minimumQuantityForSource(source: HKSource!) -> HKQuantity!
+  @objc(minimumQuantity) func minimumQuantity() -> HKQuantity!
+  @objc(maximumQuantityForSource:) func maximumQuantityForSource(source: HKSource!) -> HKQuantity!
+  @objc(maximumQuantity) func maximumQuantity() -> HKQuantity!
+  @objc(sumQuantityForSource:) func sumQuantityForSource(source: HKSource!) -> HKQuantity!
+  @objc(sumQuantity) func sumQuantity() -> HKQuantity!
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+  @objc(copyWithZone:) func copyWithZone(zone: NSZone) -> AnyObject!
+}
+@objc(HKStatisticsCollection) class HKStatisticsCollection : NSObject {
+  @availability(*, unavailable) @objc(init) init()
+  @objc(statisticsForDate:) func statisticsForDate(date: NSDate!) -> HKStatistics!
+  @objc(enumerateStatisticsFromDate:toDate:withBlock:) func enumerateStatisticsFromDate(startDate: NSDate!, toDate endDate: NSDate!, withBlock block: ((HKStatistics!, CMutablePointer<ObjCBool>) -> Void)!)
+  @objc(statistics) func statistics() -> AnyObject[]!
+  @objc(sources) func sources() -> NSSet!
+}
+@objc(HKStatisticsCollectionQuery) class HKStatisticsCollectionQuery : HKQuery {
+  @objc var anchorDate: NSDate! {
+    @objc(anchorDate) get {}
   }
-  @objc var rooms: AnyObject[]! {
-    @objc(rooms) get {}
+  @objc var options: HKStatisticsOptions {
+    @objc(options) get {}
   }
-  @objc(updateName:completionHandler:) func updateName(name: String!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(addRoom:completionHandler:) func addRoom(room: HMRoom!, completionHandler completion: ((NSError!) -> Void)!)
-  @objc(removeRoom:completionHandler:) func removeRoom(room: HMRoom!, completionHandler completion: ((NSError!) -> Void)!)
+  @objc var intervalComponents: NSDateComponents! {
+    @objc(intervalComponents) get {}
+  }
+  @objc var initialResultsHandler: ((HKStatisticsCollectionQuery!, HKStatisticsCollection!, NSError!) -> Void)! {
+    @objc(initialResultsHandler) get {}
+    @objc(setInitialResultsHandler:) set {}
+  }
+  @objc var statisticsUpdateHandler: ((HKStatisticsCollectionQuery!, HKStatistics!, HKStatisticsCollection!, NSError!) -> Void)! {
+    @objc(statisticsUpdateHandler) get {}
+    @objc(setStatisticsUpdateHandler:) set {}
+  }
+  @objc(initWithQuantityType:quantitySamplePredicate:options:anchorDate:intervalComponents:) init(quantityType: HKQuantityType!, quantitySamplePredicate: NSPredicate!, options: HKStatisticsOptions, anchorDate: NSDate!, intervalComponents: NSDateComponents!)
+  @objc(init) init()
+}
+struct HKStatisticsOptions : RawOptionSet {
+  init() {
+
+  }
+  init(_ value: UInt) {
+
+  }
+  var value: UInt
+  static var None: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static var SeparateBySource: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static var DiscreteAverage: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static var DiscreteMin: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static var DiscreteMax: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static var CumulativeSum: HKStatisticsOptions {
+    get {
+      return
+    }
+  }
+  static func fromMask(raw: UInt) -> HKStatisticsOptions {
+    return
+  }
+  static func fromRaw(raw: UInt) -> HKStatisticsOptions? {
+    return
+  }
+  func toRaw() -> UInt {
+    return
+  }
+  func getLogicValue() -> Bool {
+    return
+  }
+}
+@objc(HKStatisticsQuery) class HKStatisticsQuery : HKQuery {
+  @objc(initWithQuantityType:quantitySamplePredicate:options:completionHandler:) init(quantityType: HKQuantityType!, quantitySamplePredicate: NSPredicate!, options: HKStatisticsOptions, completionHandler handler: ((HKStatisticsQuery!, HKStatistics!, NSError!) -> Void)!)
+  @objc(init) init()
+}
+@objc(HKUnit) class HKUnit : NSObject, NSSecureCoding, NSCoding {
+  @objc var unitString: String! {
+    @objc(unitString) get {}
+  }
+  @availability(*, unavailable) @objc(init) init()
+  @objc(unitFromString:) convenience init(fromString string: String!)
+  @availability(*, unavailable, message="use object construction 'HKUnit(fromString:)'") @objc(unitFromString:) class func unitFromString(string: String!) -> Self!
+  @objc(unitFromMassFormatterUnit:) convenience init(fromMassFormatterUnit massFormatterUnit: NSMassFormatterUnit)
+  @availability(*, unavailable, message="use object construction 'HKUnit(fromMassFormatterUnit:)'") @objc(unitFromMassFormatterUnit:) class func unitFromMassFormatterUnit(massFormatterUnit: NSMassFormatterUnit) -> Self!
+  @objc(massFormatterUnitFromUnit:) class func massFormatterUnitFromUnit(unit: HKUnit!) -> NSMassFormatterUnit
+  @objc(unitFromLengthFormatterUnit:) convenience init(fromLengthFormatterUnit lengthFormatterUnit: NSLengthFormatterUnit)
+  @availability(*, unavailable, message="use object construction 'HKUnit(fromLengthFormatterUnit:)'") @objc(unitFromLengthFormatterUnit:) class func unitFromLengthFormatterUnit(lengthFormatterUnit: NSLengthFormatterUnit) -> Self!
+  @objc(lengthFormatterUnitFromUnit:) class func lengthFormatterUnitFromUnit(unit: HKUnit!) -> NSLengthFormatterUnit
+  @objc(unitFromEnergyFormatterUnit:) convenience init(fromEnergyFormatterUnit energyFormatterUnit: NSEnergyFormatterUnit)
+  @availability(*, unavailable, message="use object construction 'HKUnit(fromEnergyFormatterUnit:)'") @objc(unitFromEnergyFormatterUnit:) class func unitFromEnergyFormatterUnit(energyFormatterUnit: NSEnergyFormatterUnit) -> Self!
+  @objc(energyFormatterUnitFromUnit:) class func energyFormatterUnitFromUnit(unit: HKUnit!) -> NSEnergyFormatterUnit
+  @objc(isNull) func isNull() -> Bool
+  @objc(supportsSecureCoding) class func supportsSecureCoding() -> Bool
+  @objc(encodeWithCoder:) func encodeWithCoder(aCoder: NSCoder!)
+  @objc(initWithCoder:) init(coder aDecoder: NSCoder!)
+}
+enum HKUpdateFrequency : Int {
+  case Immediate
+  case Hourly
+  case Daily
+  case Weekly
+}
+var HKObjectQueryNoLimit: CInt {
+  get {
+    return
+  }
+}
+var HKAnchoredObjectQueryNoAnchor: CInt {
+  get {
+    return
+  }
+}
+var HKUnitMolarMassBloodGlucose: CDouble {
+  get {
+    return
+  }
 }
