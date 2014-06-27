@@ -4,7 +4,7 @@ Dumped by press Command and Click module name(in import statement) in Xcode.
 
 AppKit module is only available at MACOS, not in IOS.
 
-UIKit only in IOS.
+Many Libraries only avialiable in IOS.
 
 ## hiden features
 
