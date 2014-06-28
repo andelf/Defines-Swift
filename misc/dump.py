@@ -24,6 +24,12 @@ def dump_names(filename):
         if not extName.startswith('_') and extName not in ['var', 'let', 'inout']:
             ret.add(extName + ':')
 
+    #  top level statics
+    pattern = re.compile(r'[^ \w]var (\w+):')
+    for var in pattern.findall(data):
+        if not var.startswith('_'):
+            ret.add(var)
+
     return ret
 
 
