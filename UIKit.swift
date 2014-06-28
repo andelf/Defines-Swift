@@ -1301,6 +1301,47 @@ enum UIAlertViewStyle : Int {
   @objc(actionSheet:willDismissWithButtonIndex:) func actionSheet(actionSheet: UIActionSheet!, willDismissWithButtonIndex buttonIndex: Int)
   @objc(actionSheet:didDismissWithButtonIndex:) func actionSheet(actionSheet: UIActionSheet!, didDismissWithButtonIndex buttonIndex: Int)
 }
+extension UIApplication {
+  @objc var proximitySensingEnabled: Bool {
+    @objc(isProximitySensingEnabled) get {}
+    @objc(setProximitySensingEnabled:) set {}
+  }
+  @objc(setStatusBarHidden:animated:) func setStatusBarHidden(hidden: Bool, animated: Bool)
+}
+extension UIApplication {
+  @objc(extendStateRestoration) func extendStateRestoration()
+  @objc(completeStateRestoration) func completeStateRestoration()
+  @objc(ignoreSnapshotOnNextApplicationLaunch) func ignoreSnapshotOnNextApplicationLaunch()
+  @objc(registerObjectForStateRestoration:restorationIdentifier:) class func registerObjectForStateRestoration(object: UIStateRestoring!, restorationIdentifier: String!)
+}
+extension UIApplication {
+  @objc(setNewsstandIconImage:) func setNewsstandIconImage(image: UIImage!)
+}
+extension UIApplication {
+  @objc(beginReceivingRemoteControlEvents) func beginReceivingRemoteControlEvents()
+  @objc(endReceivingRemoteControlEvents) func endReceivingRemoteControlEvents()
+}
+extension UIApplication {
+  @objc(registerUserNotificationSettings:) func registerUserNotificationSettings(notificationSettings: UIUserNotificationSettings!)
+  @objc(currentUserNotificationSettings) func currentUserNotificationSettings() -> UIUserNotificationSettings!
+}
+extension UIApplication {
+  @objc(presentLocalNotificationNow:) func presentLocalNotificationNow(notification: UILocalNotification!)
+  @objc(scheduleLocalNotification:) func scheduleLocalNotification(notification: UILocalNotification!)
+  @objc(cancelLocalNotification:) func cancelLocalNotification(notification: UILocalNotification!)
+  @objc(cancelAllLocalNotifications) func cancelAllLocalNotifications()
+  @objc var scheduledLocalNotifications: AnyObject[]! {
+    @objc(scheduledLocalNotifications) get {}
+    @objc(setScheduledLocalNotifications:) set {}
+  }
+}
+extension UIApplication {
+  @objc(registerForRemoteNotifications) func registerForRemoteNotifications()
+  @objc(unregisterForRemoteNotifications) func unregisterForRemoteNotifications()
+  @objc(isRegisteredForRemoteNotifications) func isRegisteredForRemoteNotifications() -> Bool
+  @objc(registerForRemoteNotificationTypes:) func registerForRemoteNotificationTypes(types: UIRemoteNotificationType)
+  @objc(enabledRemoteNotificationTypes) func enabledRemoteNotificationTypes() -> UIRemoteNotificationType
+}
 var UIApplicationBackgroundFetchIntervalMinimum: NSTimeInterval
 var UIApplicationBackgroundFetchIntervalNever: NSTimeInterval
 var UIApplicationBackgroundRefreshStatusDidChangeNotification: NSString!
