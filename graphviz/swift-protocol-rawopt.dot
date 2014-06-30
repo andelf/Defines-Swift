@@ -1,0 +1,44 @@
+digraph G {
+  // General Settings
+  graph [
+         truecolor=true
+         bgcolor="#FFFFFF00"
+         fontname = "mono"
+         splines=true
+         ];
+  node [
+        shape="Mrecord"
+        style=filled
+        fillcolor="#FFFFFF"
+        fontcolor="#0F192A"
+        bgcolor=white
+        ];
+  edge [
+        color="#0F192A"
+        ];
+  "Equatable" [
+      label="{ Equatable | func ==(lhs, rhs) -&gt; Bool}"
+      ];
+
+  "RawRepresentable" [
+      label="{ RawRepresentable | typealias RawType \l| class func .fromRaw(RawType) -&gt; Self? \l| func .toRaw() -&gt; RawType\l}"
+      ];
+
+  "RawOptionSet" [
+      label="{ RawOptionSet |<f1> typealias RawType | class func .fromMask(RawType) -&gt; Self}"
+      ];
+
+  "LogicValue" [
+      label="{ LogicValue | func .getLogicValue() -&gt; Bool}"
+      ];
+
+  "BitwiseOperations" [
+      label="{ BitwiseOperations | {\& | \| | ^ | ~} | class var allZeros: Self \{ get \}}"
+      ];
+
+  "Equatable" -> "RawOptionSet";
+  "RawRepresentable" -> "RawOptionSet";
+  "LogicValue" -> "RawOptionSet";
+  "BitwiseOperations" -> "RawOptionSet":f1;
+  "Equatable" -> "RawOptionSet":f1;
+}

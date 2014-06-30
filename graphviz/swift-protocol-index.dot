@@ -1,0 +1,91 @@
+digraph G {
+  // General Settings
+  graph [
+         truecolor=true
+         bgcolor="#FFFFFF00"
+         fontname = "mono"
+         splines=true
+         ];
+  node [
+        shape="Mrecord"
+        style=filled
+        fillcolor="#FFFFFF"
+        fontcolor="#0F192A"
+        bgcolor=white
+        ];
+  edge [
+        color="#0F192A"
+        ];
+  "Equatable" [
+      label="{ Equatable | func ==(lhs, rhs) -&gt; Bool}"
+      ];
+  "Incrementable" [
+      label="{ _Incrementable | func .succ() -&gt; Self}"
+      ];
+
+  "ForwardIndex" [
+      label="{ _ForwardIndex | typealias DistanceType \l| func distance(...) -&gt; T.DistanceType | func advance(...) -&gt; T\l}"
+      ];
+
+  "BidirectionalIndex" [
+      label="{ BidirectionalIndex | func .pred() -&gt; Self}"
+      ];
+
+  "RandomAccessIndex" [
+      label="{ RandomAccessIndex | func distanceTo(...) -&gt; T.DistanceType | func advancedBy(...) -&gt; Self\l}"
+      ];
+
+  "Comparable" [
+      label="{ Comparable | func &gt;=(lhs, rhs) -&gt; Bool | func &lt;=(lhs, rhs) -&gt; Bool | func &lt;(lhs, rhs) -&gt; Bool | func &gt;(lhs, rhs) -&gt; Bool}"
+      ];
+
+  "Hashable" [
+      label="{ Hashable | var hashValue: Int \{get\} }"
+      ];
+
+  "SignedNumber" [
+      label="{ SignedNumber | func -(lhs, rhs) -&gt; Self | func -(x) -&gt; Self \l| func abs(x) -&gt; Self\l}"
+      ];
+
+  "AbsoluteValuable" [
+      label="{ AbsoluteValuable | class func .abs(Self) -&gt; Self}"
+      ];
+
+  "IntegerArithmetic" [
+      label="{ IntegerArithmetic | {+ | - | * | / | %} | (also unchecked version) | func .toIntMax() -&gt; IntMax }"
+      ];
+
+  "BitwiseOperations" [
+      label="{ BitwiseOperations | {\& | \| | ^ | ~} | class var allZeros: Self \{ get \}}"
+      ];
+
+  "Integer" [
+      label="{ Integer }"
+      ];
+
+  "SignedInteger" [
+      label="{ SignedInteger | func .toIntMax() -&gt; IntMax \l| class func .from(IntMax) -&gt; Self }"
+      ];
+
+  "UnsignedInteger" [
+      label="{ UnsignedInteger | func .toUIntMax() -&gt; UIntMax \l| class func .from(UIntMax) -&gt; Self }"
+      ];
+
+
+  "Equatable" -> "Incrementable" -> "ForwardIndex" -> "BidirectionalIndex" -> "RandomAccessIndex";
+  "Equatable" -> "Comparable";
+  "Equatable" -> "Hashable";
+
+  "Comparable" -> "SignedNumber" -> "AbsoluteValuable";
+
+  "Comparable" -> "IntegerArithmetic" -> "Integer";
+  "BitwiseOperations" -> "Integer";
+  "RandomAccessIndex" -> "Integer";
+  "Hashable" -> "Integer";
+
+  "SignedNumber" -> "SignedInteger";
+  "Integer" -> "SignedInteger";
+
+  "Integer" -> "UnsignedInteger";
+
+}

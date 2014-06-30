@@ -1,0 +1,49 @@
+digraph G {
+  // General Settings
+  graph [
+         truecolor=true
+         bgcolor="#FFFFFF00"
+         fontname = "Ubuntu"
+         ];
+  node [
+        shape=box
+        style=filled
+        fillcolor="#FFFFFF"
+        color=transparent
+        fontcolor="#0F192A"
+        ];
+  edge [
+        color="#0F192A"
+        ];
+  // Define our Nodes
+  //schema [label="Schema\nDefinition" shape=diamond color="#0F192A" penwidth=3];
+  COpaquePointer [lable = "COpaquePointer" shape="ellipse"];
+  UnsafePointer [label = "UnsafePointer<T>" shape="ellipse" fillcolor=yellow];
+  AutoreleasingUnsafePointer [label = "AutoreleasingUnsafePointer<T>" shape="ellipse"];
+  CMutablePointer [label = "CMutablePointer<T>"];
+  CConstPointer [label = "CConstPointer<T>"];
+  CMutableVoidPointer [label = "CMutableVoidPointer"];
+  CConstVoidPointer [label = "CConstVoidPointer"];
+  T [label = "T"];
+  inoutT [label = "inout T"];
+  // Define our Connections
+  COpaquePointer -> CMutableVoidPointer [style="dashed"];
+  COpaquePointer -> CConstVoidPointer [style="dashed"];
+  COpaquePointer -> UnsafePointer [label="init" dir="both"];
+
+  UnsafePointer -> UnsafePointer [label="init(cast)"];
+  UnsafePointer -> AutoreleasingUnsafePointer [style="dashed"];
+  UnsafePointer -> CMutablePointer [style="dashed"];
+  UnsafePointer -> CConstPointer [style="dashed"];
+  UnsafePointer -> CMutableVoidPointer [style="dashed"];
+  UnsafePointer -> CConstVoidPointer [style="dashed"];
+
+  UnsafePointer -> T [label=".memory"];
+  T -> inoutT [label="&T"];
+
+  inoutT -> CMutablePointer [style="dashed"];
+  inoutT -> CConstPointer [style="dashed"];
+  inoutT -> CMutableVoidPointer [style="dashed"];
+  inoutT -> CConstVoidPointer [style="dashed"];
+
+}

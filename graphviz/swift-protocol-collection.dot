@@ -1,0 +1,62 @@
+digraph G {
+  // General Settings
+  graph [
+         truecolor=true
+         bgcolor="#FFFFFF00"
+         fontname = "mono"
+         splines=true
+         ];
+  node [
+        shape="Mrecord"
+        style=filled
+        fillcolor="#FFFFFF"
+        fontcolor="#0F192A"
+        bgcolor=white
+        ];
+  edge [
+        color="#0F192A"
+        ];
+
+  "Sequence" [
+      label="{ Sequence |<f1> typealias GeneratorType : Generator \l| func .generate() -&gt; GeneratorType \l}""
+      ];
+
+  "Collection" [
+      label="{ Collection | typealias IndexType : ForwardIndex \l| typealias _Element \l| var startIndex: IndexType \{ get \} \l| var endIndex: IndexType \{ get \} \l| subscript (IndexType) -&gt; _Element \{ get \} \l| func countElements() -&gt; DistanceType \l}"
+      ];
+
+  "Sliceable" [
+      label="{ Sliceable | typealias SliceType : Sliceable \l| subscript (Range&lt;IndexType&gt;) -&gt; SliceType \{ get \}\l}"
+      ];
+
+  "MutableCollection" [
+      label="{ MutableCollection | subscript (IndexType) -&gt; GeneratorType.Element \{ get set \}\l}""
+      ];
+
+  "ExtensibleCollection" [
+      label="{ ExtensibleCollection | init() \l| func reserveCapacity(IndexType.DistanceType) \l| func extend(Sequence) \l}"
+      ];
+
+  "MutableSliceable" [
+      label="{ MutableSliceable | subscript (Range&lt;IndexType&gt;) -&gt; SliceType \{ get set \}}"
+      ];
+
+  "ArrayType" [
+      label="{ ArrayType | init(count: Int, repeatedValue: GeneratorType.Element) \l| var count: Int \{ get \} \l| var capacity: Int \{ get \} \l| var isEmpty: Bool \{ get \} \l| func .reserveCapacity(Int) \l| func .append(GeneratorType.Element) \l| func .extend(Sequence) \l| func .removeLast() -&gt; GeneratorType.Element \l| func .insert(GeneratorType.Element, atIndex: Int) \l| func .removeAtIndex(Int) -&gt; GeneratorType.Element \l| func .removeAll(#keepCapacity: Bool) \l| func .join(Sequence) -&gt; Self \l| func .reduce(...) \l| func .sort(...) \l| typealias _Buffer: ArrayBufferType \l| init(_Buffer) \l}"
+  ];
+
+  "Generator" [
+      label="{ Generator | typealias Element \l| func next() -&gt; Element? }"
+      ];
+
+
+  "Sequence" -> "Collection" -> "Sliceable";
+  "Collection" -> "MutableCollection";
+  "Collection" -> "ExtensibleCollection";
+  "Sliceable" -> "MutableSliceable";
+  "MutableCollection" -> "MutableSliceable";
+  "ExtensibleCollection" -> "ArrayType";
+  "MutableSliceable" -> "ArrayType";
+
+  "Sequence":f1 -> "Generator" [style=dashed];
+}
