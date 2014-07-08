@@ -25,6 +25,8 @@ operator infix &/ {
 }
 operator infix === {
 }
+operator infix ..< {
+}
 operator infix == {
 }
 operator infix ^= {
@@ -67,9 +69,9 @@ operator infix << {
 }
 operator infix || {
 }
-operator infix <= {
-}
 operator infix >>= {
+}
+operator infix <= {
 }
 operator infix |= {
 }
@@ -77,33 +79,35 @@ operator postfix -- {
 }
 operator prefix -- {
 }
-operator infix !== {
-}
 operator infix >= {
 }
 operator infix ~= {
+}
+operator infix !== {
 }
 operator infix ~> {
 }
 operator infix | {
 }
-operator infix >> {
-}
 operator infix < {
+}
+operator infix >> {
 }
 operator infix > {
 }
-operator infix != {
-}
 operator prefix ~ {
 }
-struct UnsafePointer<T> : BidirectionalIndex, Comparable, Hashable, LogicValue {
+operator infix != {
+}
+struct UnsafePointer<T> : BidirectionalIndex, Comparable, Hashable, LogicValue, NilLiteralConvertible, _Pointer {
   var value: RawPointer
   init()
   init(_ value: RawPointer)
   init(_ other: COpaquePointer)
   init(_ value: Int)
   init<U>(_ from: UnsafePointer<U>)
+  init<U>(_ from: ConstUnsafePointer<U>)
+  @transparent static func convertFromNilLiteral() -> UnsafePointer<T>
   static func null() -> UnsafePointer<T>
   static func alloc(num: Int) -> UnsafePointer<T>
   func dealloc(num: Int)
@@ -128,21 +132,19 @@ struct UnsafePointer<T> : BidirectionalIndex, Comparable, Hashable, LogicValue {
     @transparent get {}
     @transparent set {}
   }
+  func _setIfNonNil(body: () -> T)
+  @transparent func _withBridgeObject<U, R>(inout buffer: U?, body: (AutoreleasingUnsafePointer<U?>) -> R) -> R
+  @transparent func _withBridgeValue<U, R>(inout buffer: U, body: (UnsafePointer<U>) -> R) -> R
+  func withUnsafePointer<R>(f: UnsafePointer<T> -> R) -> R
   var hashValue: Int {
     get {}
   }
-  func succ() -> UnsafePointer<T>
-  func pred() -> UnsafePointer<T>
-  @conversion @transparent func __conversion() -> CMutablePointer<T>
-  func __conversion() -> CMutableVoidPointer
-  @conversion @transparent func __conversion() -> CConstPointer<T>
-  @conversion @transparent func __conversion() -> CConstVoidPointer
-  @conversion @transparent func __conversion() -> AutoreleasingUnsafePointer<T>
-  init(_ cp: CConstPointer<T>)
-  init(_ cm: CMutablePointer<T>)
-  init(_ op: AutoreleasingUnsafePointer<T>)
-  init(_ cp: CConstVoidPointer)
-  init(_ cp: CMutableVoidPointer)
+  func successor() -> UnsafePointer<T>
+  func predecessor() -> UnsafePointer<T>
+}
+struct _OptionalNilComparisonType : NilLiteralConvertible {
+  @transparent static func convertFromNilLiteral() -> _OptionalNilComparisonType
+  init()
 }
 protocol DebugPrintable {
   var debugDescription: String { get }
@@ -158,9 +160,9 @@ enum _ArrayCastKind {
     get {}
   }
 }
+@transparent func _convertMutableArrayToPointerArgument<FromElement, ToPointer : _Pointer>(inout a: Array<FromElement>) -> (AnyObject?, ToPointer)
 let _x86_64RegisterSaveWords: Int
 func _cocoaStringSliceNotInitialized(target: _StringCore, subRange: Range<Int>) -> _StringCore
-@transparent func _convertUnsafePointerToCMutablePointer<T>(p: UnsafePointer<T>) -> CMutablePointer<T>
 struct Dictionary<KeyType : Hashable, ValueType> : Collection, DictionaryLiteralConvertible {
   typealias _Self = Dictionary<KeyType, ValueType>
   typealias _VariantStorage = _VariantDictionaryStorage<KeyType, ValueType>
@@ -208,22 +210,17 @@ func ==<T : Equatable>(lhs: ContiguousArray<T>, rhs: ContiguousArray<T>) -> Bool
 func ==<T : Equatable>(lhs: Slice<T>, rhs: Slice<T>) -> Bool
 func ==<T : Equatable>(lhs: Array<T>, rhs: Array<T>) -> Bool
 @transparent func ==(lhs: Bool, rhs: Bool) -> Bool
-@transparent func ==<T>(lhs: CMutablePointer<T>, rhs: CMutablePointer<T>) -> Bool
-@transparent func ==<T>(lhs: CMutablePointer<T>, rhs: CConstPointer<T>) -> Bool
-@transparent func ==<T>(lhs: CConstPointer<T>, rhs: CMutablePointer<T>) -> Bool
-@transparent func ==(lhs: CMutableVoidPointer, rhs: CMutableVoidPointer) -> Bool
 @transparent func ==<T>(lhs: AutoreleasingUnsafePointer<T>, rhs: AutoreleasingUnsafePointer<T>) -> Bool
-@transparent func ==<T>(lhs: CConstPointer<T>, rhs: CConstPointer<T>) -> Bool
-@transparent func ==(lhs: CConstVoidPointer, rhs: CConstVoidPointer) -> Bool
 @transparent func ==(lhs: NativeObject, rhs: NativeObject) -> Bool
 @transparent func ==(lhs: RawPointer, rhs: RawPointer) -> Bool
 @transparent func ==(lhs: CString, rhs: CString) -> Bool
 func ==(lhs: COpaquePointer, rhs: COpaquePointer) -> Bool
+func ==<T>(lhs: CFunctionPointer<T>, rhs: CFunctionPointer<T>) -> Bool
 func ==(lhs: Character, rhs: Character) -> Bool
 func ==<KeyType : Hashable, ValueType>(lhs: _NativeDictionaryIndex<KeyType, ValueType>, rhs: _NativeDictionaryIndex<KeyType, ValueType>) -> Bool
 func ==(lhs: _CocoaDictionaryIndex, rhs: _CocoaDictionaryIndex) -> Bool
 func ==<KeyType : Hashable, ValueType>(lhs: DictionaryIndex<KeyType, ValueType>, rhs: DictionaryIndex<KeyType, ValueType>) -> Bool
-func ==<KeyType : Equatable, ValueType : Equatable>(lhs: Dictionary<KeyType, ValueType>, rhs: Dictionary<KeyType, ValueType>) -> Bool
+func ==<KeyType : Equatable, ValueType : Equatable>(lhs: [KeyType : ValueType], rhs: [KeyType : ValueType]) -> Bool
 func ==<K : Hashable, V>(lhs: _DictionaryMirrorPosition<K, V>, rhs: Int) -> Bool
 func ==<Base : Collection>(lhs: FilterCollectionViewIndex<Base>, rhs: FilterCollectionViewIndex<Base>) -> Bool
 @transparent func ==(lhs: UInt8, rhs: UInt8) -> Bool
@@ -241,22 +238,18 @@ func ==<Base : Collection>(lhs: FilterCollectionViewIndex<Base>, rhs: FilterColl
 @transparent func ==(lhs: Float80, rhs: Float80) -> Bool
 func ==(lhs: FloatingPointClassification, rhs: FloatingPointClassification) -> Bool
 func ==<Value, Element>(lhs: HeapBuffer<Value, Element>, rhs: HeapBuffer<Value, Element>) -> Bool
-func ==(lhs: _NilOptionalComparator, rhs: _NilOptionalComparator) -> Bool
 func ==<T : Equatable>(lhs: T?, rhs: T?) -> Bool
-@transparent func ==<T>(lhs: T?, rhs: _Nil) -> Bool
-@transparent func ==<T>(lhs: _Nil, rhs: T?) -> Bool
 func ==<T : _RawOptionSet>(a: T, b: T) -> Bool
 func ==(x: ObjectIdentifier, y: ObjectIdentifier) -> Bool
 func ==(a: MirrorDisposition, b: MirrorDisposition) -> Bool
 func ==<I>(lhs: ReverseIndex<I>, rhs: ReverseIndex<I>) -> Bool
 func ==(lhs: String, rhs: String) -> Bool
 func ==(lhs: String.Index, rhs: String.Index) -> Bool
-@availability(*, unavailable, message="Cannot compare a String to nil") func ==(lhs: String, rhs: _Nil) -> Bool
-@availability(*, unavailable, message="Cannot compare a String to nil") func ==(lhs: _Nil, rhs: String) -> Bool
 func ==(lhs: String.UTF8View.Index, rhs: String.UTF8View.Index) -> Bool
 func ==(lhs: String.UnicodeScalarView.IndexType, rhs: String.UnicodeScalarView.IndexType) -> Bool
 func ==(lhs: UnicodeScalar, rhs: UnicodeScalar) -> Bool
 @transparent func ==<T>(lhs: UnsafePointer<T>, rhs: UnsafePointer<T>) -> Bool
+@transparent func ==<T>(lhs: ConstUnsafePointer<T>, rhs: ConstUnsafePointer<T>) -> Bool
 func ==(lhs: Bit, rhs: Bit) -> Bool
 @transparent func !(a: Bool) -> Bool
 func !<T : LogicValue>(a: T) -> Bool
@@ -288,6 +281,40 @@ struct _TupleMirror : Mirror {
   }
   init(data: _MagicMirrorData)
 }
+protocol UnicodeCodec {
+  typealias CodeUnit
+  init()
+  func decode<G : Generator where `Self`.CodeUnit == CodeUnit>(inout next: G) -> UTFDecodeResult
+  class func encode<S : Sink where `Self`.CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
+}
+struct UInt32 : UnsignedInteger {
+  var value: Int32
+  @transparent init()
+  @transparent init(_ v: Int32)
+  @transparent init(_ value: UInt32)
+  @transparent init(bigEndian value: UInt32)
+  @transparent init(littleEndian value: UInt32)
+  @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> UInt32
+  @transparent static func convertFromIntegerLiteral(value: UInt32) -> UInt32
+  @transparent func _getBuiltinArrayBoundValue() -> Word
+  typealias ArrayBoundType = UInt32
+  func getArrayBoundValue() -> UInt32
+  var bigEndian: UInt32 {
+    get {}
+  }
+  var littleEndian: UInt32 {
+    get {}
+  }
+  var byteSwapped: UInt32 {
+    get {}
+  }
+  static var max: UInt32 {
+    @transparent get {}
+  }
+  static var min: UInt32 {
+    @transparent get {}
+  }
+}
 @transparent func %(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func %(lhs: Int8, rhs: Int8) -> Int8
 @transparent func %(lhs: UInt16, rhs: UInt16) -> UInt16
@@ -302,28 +329,6 @@ struct _TupleMirror : Mirror {
 @asmname("fmod") func %(lhs: Double, rhs: Double) -> Double
 @asmname("fmodl") func %(lhs: Float80, rhs: Float80) -> Float80
 @transparent func %<T : _IntegerArithmetic>(lhs: T, rhs: T) -> T
-struct UInt32 : UnsignedInteger {
-  var value: Int32
-  @transparent init()
-  @transparent init(_ v: Int32)
-  @transparent init(_ value: UInt32)
-  @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> UInt32
-  @transparent static func convertFromIntegerLiteral(value: UInt32) -> UInt32
-  @transparent func _getBuiltinArrayBoundValue() -> Word
-  typealias ArrayBoundType = UInt32
-  func getArrayBoundValue() -> UInt32
-  static var max: UInt32 {
-    @transparent get {}
-  }
-  static var min: UInt32 {
-    @transparent get {}
-  }
-}
-protocol UnicodeCodec {
-  typealias CodeUnit
-  class func decode<G : Generator where `Self`.CodeUnit == CodeUnit>(inout next: G) -> UnicodeScalar?
-  class func encode<S : Sink where `Self`.CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
-}
 @transparent func &(lhs: Bool, rhs: Bool) -> Bool
 @transparent func &(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func &(lhs: Int8, rhs: Int8) -> Int8
@@ -359,9 +364,6 @@ protocol ArrayLiteralConvertible {
 @transparent func *(lhs: Double, rhs: Double) -> Double
 @transparent func *(lhs: Float80, rhs: Float80) -> Float80
 @transparent func *<T : _IntegerArithmetic>(lhs: T, rhs: T) -> T
-protocol LogicValue {
-  func getLogicValue() -> Bool
-}
 @transparent func +(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func +(lhs: Int8, rhs: Int8) -> Int8
 @transparent func +(lhs: UInt16, rhs: UInt16) -> UInt16
@@ -392,6 +394,14 @@ func +(lhs: UnicodeScalar, rhs: Int) -> UnicodeScalar
 func +(lhs: Int, rhs: UnicodeScalar) -> UnicodeScalar
 @transparent func +<T>(lhs: UnsafePointer<T>, rhs: Int) -> UnsafePointer<T>
 @transparent func +<T>(lhs: Int, rhs: UnsafePointer<T>) -> UnsafePointer<T>
+@transparent func +<T>(lhs: ConstUnsafePointer<T>, rhs: Int) -> ConstUnsafePointer<T>
+@transparent func +<T>(lhs: Int, rhs: ConstUnsafePointer<T>) -> ConstUnsafePointer<T>
+protocol LogicValue {
+  func getLogicValue() -> Bool
+}
+protocol _BuiltinUTF16StringLiteralConvertible : _BuiltinStringLiteralConvertible {
+  class func _convertFromBuiltinUTF16StringLiteral(start: RawPointer, numberOfCodeUnits: Word) -> Self
+}
 struct FilterCollectionView<Base : Collection> : Collection {
   typealias IndexType = FilterCollectionViewIndex<Base>
   var startIndex: FilterCollectionViewIndex<Base> {
@@ -407,9 +417,6 @@ struct FilterCollectionView<Base : Collection> : Collection {
   var _base: Base
   var _include: (Base.GeneratorType.Element) -> Bool
   init(_base: Base, _include: (Base.GeneratorType.Element) -> Bool)
-}
-protocol _BuiltinUTF16StringLiteralConvertible : _BuiltinStringLiteralConvertible {
-  class func _convertFromBuiltinUTF16StringLiteral(start: RawPointer, numberOfCodeUnits: Word) -> Self
 }
 @transparent func -(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func -(lhs: Int8, rhs: Int8) -> Int8
@@ -433,6 +440,8 @@ func -(lhs: UnicodeScalar, rhs: UnicodeScalar) -> Int
 func -(lhs: UnicodeScalar, rhs: Int) -> UnicodeScalar
 @transparent func -<T>(lhs: UnsafePointer<T>, rhs: Int) -> UnsafePointer<T>
 @transparent func -<T>(lhs: UnsafePointer<T>, rhs: UnsafePointer<T>) -> Int
+@transparent func -<T>(lhs: ConstUnsafePointer<T>, rhs: Int) -> ConstUnsafePointer<T>
+@transparent func -<T>(lhs: ConstUnsafePointer<T>, rhs: ConstUnsafePointer<T>) -> Int
 @transparent func /(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func /(lhs: Int8, rhs: Int8) -> Int8
 @transparent func /(lhs: UInt16, rhs: UInt16) -> UInt16
@@ -471,13 +480,12 @@ struct _CocoaDictionaryStorage : _DictionaryStorage {
   init(cocoaDictionary: _SwiftNSDictionary)
 }
 var _cocoaStringReadAll: (source: _CocoaString, destination: UnsafePointer<CodeUnit>) -> Void
-@transparent func _convertUnsafePointerToCConstPointer<T>(p: UnsafePointer<T>) -> CConstPointer<T>
 protocol Equatable {
   func ==(lhs: Self, rhs: Self) -> Bool
 }
+func _dictionaryBridgeFromObjectiveC<Key, Value, BridgesToKey, BridgesToValue>(source: Dictionary<Key, Value>) -> Dictionary<BridgesToKey, BridgesToValue>
 func _arrayAppend<_Buffer : ArrayBufferType>(inout buffer: _Buffer, newValue: _Buffer.Element)
-@asmname("swift_reportUnimplementedInitializer") func _reportUnimplementedInitializer(className: RawPointer, classNameLength: Word, file: RawPointer, fileLength: Word, line: UWord, column: UWord, initName: RawPointer, initNameLength: Word)
-@asmname("putchar") func c_putchar(value: Int32)
+@asmname("swift_reportUnimplementedInitializer") func _reportUnimplementedInitializer(className: RawPointer, classNameLength: Word, initName: RawPointer, initNameLength: Word)
 @assignment @transparent func |=(inout lhs: Bool, rhs: Bool)
 @assignment @transparent func |=(inout lhs: UInt8, rhs: UInt8)
 @assignment @transparent func |=(inout lhs: Int8, rhs: Int8)
@@ -501,6 +509,8 @@ func _arrayAppend<_Buffer : ArrayBufferType>(inout buffer: _Buffer, newValue: _B
 @transparent func >=(lhs: Int, rhs: Int) -> Bool
 func >=<T : _Comparable>(lhs: T?, rhs: T?) -> Bool
 func >=<T : _Comparable>(lhs: T, rhs: T) -> Bool
+@transparent func _fabs(x: Float) -> Float
+@transparent func _fabs(x: Double) -> Double
 protocol Mirror {
   var value: Any { get }
   var valueType: Any.Type { get }
@@ -511,6 +521,7 @@ protocol Mirror {
   var quickLookObject: QuickLookObject? { get }
   var disposition: MirrorDisposition { get }
 }
+typealias Word = Int
 @transparent func <(lhs: CString, rhs: CString) -> Bool
 func <<K : Hashable, V>(lhs: _DictionaryMirrorPosition<K, V>, rhs: Int) -> Bool
 @transparent func <(lhs: UInt8, rhs: UInt8) -> Bool
@@ -530,6 +541,7 @@ func <<T : _Comparable>(lhs: T?, rhs: T?) -> Bool
 func <(lhs: String, rhs: String) -> Bool
 func <(lhs: UnicodeScalar, rhs: UnicodeScalar) -> Bool
 @transparent func <<T>(lhs: UnsafePointer<T>, rhs: UnsafePointer<T>) -> Bool
+@transparent func <<T>(lhs: ConstUnsafePointer<T>, rhs: ConstUnsafePointer<T>) -> Bool
 func <(lhs: Bit, rhs: Bit) -> Bool
 @transparent func >>(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func >>(lhs: Int8, rhs: Int8) -> Int8
@@ -541,7 +553,6 @@ func <(lhs: Bit, rhs: Bit) -> Bool
 @transparent func >>(lhs: Int64, rhs: Int64) -> Int64
 @transparent func >>(lhs: UInt, rhs: UInt) -> UInt
 @transparent func >>(lhs: Int, rhs: Int) -> Int
-typealias Word = Int
 func ><K : Hashable, V>(lhs: _DictionaryMirrorPosition<K, V>, rhs: Int) -> Bool
 @transparent func >(lhs: UInt8, rhs: UInt8) -> Bool
 @transparent func >(lhs: Int8, rhs: Int8) -> Bool
@@ -571,20 +582,41 @@ struct _DictionaryBody {
   var maxLoadFactorInverse: Double
 }
 protocol CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 func count<I : RandomAccessIndex>(r: Range<I>) -> I.DistanceType
+struct _RangeGeneratorMirror<T : ForwardIndex> : Mirror {
+  var _value: RangeGenerator<T>
+  init(_ x: RangeGenerator<T>)
+  var value: Any {
+    get {}
+  }
+  var valueType: Any.Type {
+    get {}
+  }
+  var objectIdentifier: ObjectIdentifier? {
+    get {}
+  }
+  var count: Int {
+    get {}
+  }
+  subscript (i: Int) -> (String, Mirror) {
+    get {}
+  }
+  var summary: String {
+    get {}
+  }
+  var quickLookObject: QuickLookObject? {
+    get {}
+  }
+  var disposition: MirrorDisposition {
+    get {}
+  }
+}
 @noreturn @transparent func _fatalError(_ message: StaticString = default, file: StaticString = default, line: UWord = default)
 func equal<S1 : Sequence, S2 : Sequence where S1.GeneratorType.Element == S1.GeneratorType.Element, S1.GeneratorType.Element : Equatable>(a1: S1, a2: S2) -> Bool
-func equal<S1 : Sequence, S2 : Sequence where S1.GeneratorType.Element == S1.GeneratorType.Element>(a1: S1, a2: S2, pred: (S1.GeneratorType.Element, S1.GeneratorType.Element) -> Bool) -> Bool
+func equal<S1 : Sequence, S2 : Sequence where S1.GeneratorType.Element == S1.GeneratorType.Element>(a1: S1, a2: S2, predicate: (S1.GeneratorType.Element, S1.GeneratorType.Element) -> Bool) -> Bool
 let _x86_64CountSSERegisters: Int
-protocol BitwiseOperations {
-  func &(_: Self, _: Self) -> Self
-  func |(_: Self, _: Self) -> Self
-  func ^(_: Self, _: Self) -> Self
-  func ~(_: Self) -> Self
-  class var allZeros: Self { get }
-}
 @assignment @transparent func ^=(inout lhs: Bool, rhs: Bool)
 @assignment @transparent func ^=(inout lhs: UInt8, rhs: UInt8)
 @assignment @transparent func ^=(inout lhs: Int8, rhs: Int8)
@@ -596,7 +628,16 @@ protocol BitwiseOperations {
 @assignment @transparent func ^=(inout lhs: Int64, rhs: Int64)
 @assignment @transparent func ^=(inout lhs: UInt, rhs: UInt)
 @assignment @transparent func ^=(inout lhs: Int, rhs: Int)
+protocol BitwiseOperations {
+  func &(_: Self, _: Self) -> Self
+  func |(_: Self, _: Self) -> Self
+  func ^(_: Self, _: Self) -> Self
+  func ~(_: Self) -> Self
+  class var allZeros: Self { get }
+}
 @asmname("swift_stdlib_conformsToProtocol") func _stdlib_conformsToProtocol<SourceType, DestType>(value: SourceType, _: DestType.Type) -> Bool
+@transparent func _rint(x: Float) -> Float
+@transparent func _rint(x: Double) -> Double
 @transparent func ^(lhs: Bool, rhs: Bool) -> Bool
 @transparent func ^(lhs: UInt8, rhs: UInt8) -> UInt8
 @transparent func ^(lhs: Int8, rhs: Int8) -> Int8
@@ -622,8 +663,7 @@ func _atREPLExit(handler: () -> ())
   @objc func countByEnumeratingWithState(state: UnsafePointer<_SwiftNSFastEnumerationState>, objects: UnsafePointer<AnyObject>, count: Int) -> Int
 }
 let _x86_64CountGPRegisters: Int
-func _copyCollectionToNativeArrayBuffer<C : protocol<_Collection, _Sequence_>>(source: C) -> ContiguousArrayBuffer<C.GeneratorType.Element>
-struct ReverseRange<T : BidirectionalIndex> : Sequence {
+struct ReverseRange<T : BidirectionalIndex> : Sequence, Reflectable {
   init(start: T, pastEnd: T)
   init(range fwd: Range<T>)
   func isEmpty() -> Bool
@@ -631,8 +671,11 @@ struct ReverseRange<T : BidirectionalIndex> : Sequence {
   typealias GeneratorType = ReverseRangeGenerator<T>
   func generate() -> ReverseRangeGenerator<T>
   var _bounds: (T, T)
+  func getMirror() -> Mirror
 }
-func _dumpWithMirror<TargetStream : OutputStream>(mirror: Mirror, name: String?, indent: Int, maxDepth: Int, inout maxItemCounter: Int, inout visitedItems: Dictionary<ObjectIdentifier, Int>, inout targetStream: TargetStream)
+func _copyCollectionToNativeArrayBuffer<C : protocol<_Collection, _Sequence_>>(source: C) -> ContiguousArrayBuffer<C.GeneratorType.Element>
+func _memcpy(#dest: UnsafePointer<Void>, #src: UnsafePointer<Void>, #size: UInt)
+func _dumpWithMirror<TargetStream : OutputStream>(mirror: Mirror, name: String?, indent: Int, maxDepth: Int, inout maxItemCounter: Int, inout visitedItems: [ObjectIdentifier : Int], inout targetStream: TargetStream)
 struct EnumerateGenerator<Base : Generator> : Generator, Sequence {
   typealias Element = (index: Int, element: Base.Element)
   var base: Base
@@ -649,13 +692,14 @@ struct FilterGenerator<Base : Generator> : Generator, Sequence {
   var _include: (Base.Element) -> Bool
   init(_base: Base, _include: (Base.Element) -> Bool)
 }
-protocol RawOptionSet : _RawOptionSet, LogicValue, Equatable {
+protocol RawOptionSet : _RawOptionSet, LogicValue, Equatable, NilLiteralConvertible {
   class func fromMask(raw: Self.RawType) -> Self
 }
 @transparent func _injectNothingIntoOptional<T>() -> Optional<T>
-@asmname("llvm.ctlz.i64") func __llvm_ctlz(value: Int64, isZeroUndef: Int1) -> Int64
 @asmname("swift_stdlib_getTypeName") func _stdlib_getTypeNameImpl<T>(value: T, result: UnsafePointer<String>)
 @transparent func ||(lhs: LogicValue, rhs: @auto_closure () -> LogicValue) -> Bool
+func _arrayReplace<B : ArrayBufferType, C : Collection where B.Element == B.Element, Int == Int>(inout target: B, subRange: Range<Int>, newValues: C)
+@transparent func ~=<T>(lhs: _OptionalNilComparisonType, rhs: T?) -> Bool
 @transparent func ~=<T : Equatable>(a: T, b: T) -> Bool
 func ~=<T : RandomAccessIndex where T.DistanceType : SignedInteger>(x: Range<T>, y: T) -> Bool
 func !==<T : ArrayType, U : ArrayType>(lhs: T, rhs: U) -> Bool
@@ -667,7 +711,7 @@ func ~><T : _Collection, R>(s: T, args: (_PreprocessingPass, ((T) -> R))) -> R?
 func ~><T : _Sequence>(s: T, _: (_UnderestimateCount, ())) -> Int
 func ~><T : _Sequence, R>(s: T, _: (_PreprocessingPass, ((T) -> R))) -> R?
 func ~><S : _Sequence_>(source: S, _: (_CopyToNativeArrayBuffer, ())) -> ContiguousArrayBuffer<S.GeneratorType.Element>
-func ~><C : Collection>(source: C, _: (_CopyToNativeArrayBuffer, ())) -> ContiguousArrayBuffer<C.GeneratorType.Element>
+func ~><C : protocol<_Collection, _Sequence_>>(source: C, _: (_CopyToNativeArrayBuffer, ())) -> ContiguousArrayBuffer<C.GeneratorType.Element>
 func ~><T>(x: EmptyCollection<T>, _: (_CountElements, ())) -> Int
 func ~><T : _ForwardIndex>(start: T, rest: (_Distance, T)) -> T.DistanceType
 @transparent func ~><T : _ForwardIndex>(start: T, rest: (_Advance, T.DistanceType)) -> T
@@ -692,24 +736,51 @@ func ~><T>(x: CollectionOfOne<T>, _: (_CountElements, ())) -> Int
 @transparent func |(lhs: UInt, rhs: UInt) -> UInt
 @transparent func |(lhs: Int, rhs: Int) -> Int
 func |<T : RawOptionSet>(a: T, b: T) -> T
-struct ImplicitlyUnwrappedOptional<T> : LogicValue, Reflectable {
-  var value: T?
+enum ImplicitlyUnwrappedOptional<T> : LogicValue, Reflectable, NilLiteralConvertible {
+  case None
+  case Some(T)
   init()
+  init(_ some: T)
   init(_ v: T?)
-  static var None: ImplicitlyUnwrappedOptional<T> {
-    @transparent get {}
-  }
-  @transparent static func Some(value: T) -> ImplicitlyUnwrappedOptional<T>
+  @transparent static func convertFromNilLiteral() -> ImplicitlyUnwrappedOptional<T>
   @transparent func getLogicValue() -> Bool
-  func getMirror() -> Mirror
   func map<U>(f: (T) -> U) -> ImplicitlyUnwrappedOptional<U>
+  func getMirror() -> Mirror
+}
+struct _StridedRangeGeneratorMirror<T : ForwardIndex> : Mirror {
+  var _value: StridedRangeGenerator<T>
+  init(_ x: StridedRangeGenerator<T>)
+  var value: Any {
+    get {}
+  }
+  var valueType: Any.Type {
+    get {}
+  }
+  var objectIdentifier: ObjectIdentifier? {
+    get {}
+  }
+  var count: Int {
+    get {}
+  }
+  subscript (i: Int) -> (String, Mirror) {
+    get {}
+  }
+  var summary: String {
+    get {}
+  }
+  var quickLookObject: QuickLookObject? {
+    get {}
+  }
+  var disposition: MirrorDisposition {
+    get {}
+  }
 }
 func !=<T : Equatable>(lhs: ContiguousArray<T>, rhs: ContiguousArray<T>) -> Bool
 func !=<T : Equatable>(lhs: Slice<T>, rhs: Slice<T>) -> Bool
 func !=<T : Equatable>(lhs: Array<T>, rhs: Array<T>) -> Bool
 @transparent func !=(lhs: NativeObject, rhs: NativeObject) -> Bool
 @transparent func !=(lhs: RawPointer, rhs: RawPointer) -> Bool
-func !=<KeyType : Equatable, ValueType : Equatable>(lhs: Dictionary<KeyType, ValueType>, rhs: Dictionary<KeyType, ValueType>) -> Bool
+func !=<KeyType : Equatable, ValueType : Equatable>(lhs: [KeyType : ValueType], rhs: [KeyType : ValueType]) -> Bool
 @transparent func !=(lhs: UInt8, rhs: UInt8) -> Bool
 @transparent func !=(lhs: Int8, rhs: Int8) -> Bool
 @transparent func !=(lhs: UInt16, rhs: UInt16) -> Bool
@@ -721,8 +792,6 @@ func !=<KeyType : Equatable, ValueType : Equatable>(lhs: Dictionary<KeyType, Val
 @transparent func !=(lhs: UInt, rhs: UInt) -> Bool
 @transparent func !=(lhs: Int, rhs: Int) -> Bool
 func !=<T : Equatable>(lhs: T?, rhs: T?) -> Bool
-@transparent func !=<T>(lhs: T?, rhs: _Nil) -> Bool
-@transparent func !=<T>(lhs: _Nil, rhs: T?) -> Bool
 func !=<T : Equatable>(lhs: T, rhs: T) -> Bool
 @transparent func ~(a: Bool) -> Bool
 @transparent func ~(rhs: UInt8) -> UInt8
@@ -736,13 +805,14 @@ func !=<T : Equatable>(lhs: T, rhs: T) -> Bool
 @transparent func ~(rhs: UInt) -> UInt
 @transparent func ~(rhs: Int) -> Int
 func ~<T : RawOptionSet>(a: T) -> T
-func bridgeFromObjectiveC<T>(x: AnyObject, _: T.Type) -> T?
+func bridgeFromObjectiveC<T>(x: AnyObject, _: T.Type) -> T
 protocol ExtensibleCollection : _ExtensibleCollection {
 }
 func underestimateCount<T : Sequence>(x: T) -> Int
 typealias StringLiteralType = String
 func _advanceForward<T : _ForwardIndex>(start: T, n: T.DistanceType) -> T
 func _advanceForward<T : _ForwardIndex>(start: T, n: T.DistanceType, end: T) -> T
+@transparent func _convertPointerToPointerArgument<FromPointer : _Pointer, ToPointer : _Pointer>(from: FromPointer) -> ToPointer
 struct SinkOf<T> : Sink {
   init(_ put: (T) -> ())
   init<S : Sink where T == T>(_ base: S)
@@ -754,11 +824,22 @@ struct UInt64 : UnsignedInteger {
   @transparent init()
   @transparent init(_ v: Int64)
   @transparent init(_ value: UInt64)
+  @transparent init(bigEndian value: UInt64)
+  @transparent init(littleEndian value: UInt64)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> UInt64
   @transparent static func convertFromIntegerLiteral(value: UInt64) -> UInt64
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = UInt64
   func getArrayBoundValue() -> UInt64
+  var bigEndian: UInt64 {
+    get {}
+  }
+  var littleEndian: UInt64 {
+    get {}
+  }
+  var byteSwapped: UInt64 {
+    get {}
+  }
   static var max: UInt64 {
     @transparent get {}
   }
@@ -768,7 +849,7 @@ struct UInt64 : UnsignedInteger {
 }
 protocol Integer : _Integer, RandomAccessIndex {
 }
-@transparent func _convertCOpaquePointerToCConstVoidPointer(p: COpaquePointer) -> CConstVoidPointer
+func _arrayBridgeFromObjectiveCConditional<Base, BridgesToDerived>(source: Array<Base>) -> Array<BridgesToDerived>?
 @noreturn @transparent func _conditionallyUnreachable()
 func _doubleToString(value: Double) -> String
 func lexicographicalCompare<S1 : Sequence, S2 : Sequence where S1.GeneratorType.Element == S1.GeneratorType.Element, S1.GeneratorType.Element : Comparable>(a1: S1, a2: S2) -> Bool
@@ -782,7 +863,7 @@ func lexicographicalCompare<S1 : Sequence, S2 : Sequence where S1.GeneratorType.
   func bridgingObjectForKey(aKey: AnyObject, dummy: ()) -> AnyObject?
   func bridgingKeyEnumerator(dummy: ()) -> _SwiftNSEnumerator
   func bridgingCountByEnumeratingWithState(state: UnsafePointer<_SwiftNSFastEnumerationState>, objects: UnsafePointer<AnyObject>, count: Int, dummy: ()) -> Int
-  @objc(initWithObjects:forKeys:count:) init(objects: CConstPointer<AnyObject?>, forKeys: CConstVoidPointer, count: Int)
+  @objc(initWithObjects:forKeys:count:) init(objects: _DictionaryObjectsPointer, forKeys: _DictionaryKeysPointer, count: Int)
   @objc var count: Int {
     @objc get {}
   }
@@ -800,7 +881,6 @@ protocol IntegerLiteralConvertible {
 func map<S : Sequence, T>(source: S, transform: (S.GeneratorType.Element) -> T) -> MapSequenceView<S, T>
 func map<C : Collection, T>(source: C, transform: (C.GeneratorType.Element) -> T) -> MapCollectionView<C, T>
 func map<T, U>(x: T?, f: (T) -> U) -> U?
-func withUnsafePointer<T, Result>(inout arg: T, body: (UnsafePointer<T>) -> Result) -> Result
 enum _VariantDictionaryStorage<KeyType : Hashable, ValueType> : _DictionaryStorage {
   typealias _NativeStorageElement = _DictionaryElement<KeyType, ValueType>
   typealias NativeStorage = _NativeDictionaryStorage<KeyType, ValueType>
@@ -834,7 +914,7 @@ enum _VariantDictionaryStorage<KeyType : Hashable, ValueType> : _DictionaryStora
   func maybeGet(key: KeyType) -> ValueType?
   func nativeUpdateValue(value: ValueType, forKey key: KeyType) -> ValueType?
   func updateValue(value: ValueType, forKey key: KeyType) -> ValueType?
-  func nativeDeleteImpl(nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>, start: Int, offset: Int)
+  func nativeDeleteImpl(nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>, idealBucket: Int, offset: Int)
   func nativeRemoveObjectForKey(key: KeyType) -> ValueType?
   func nativeRemoveAtIndex(nativeIndex: _NativeDictionaryIndex<KeyType, ValueType>)
   func removeAtIndex(index: DictionaryIndex<KeyType, ValueType>)
@@ -847,11 +927,12 @@ enum _VariantDictionaryStorage<KeyType : Hashable, ValueType> : _DictionaryStora
   func generate() -> DictionaryGenerator<KeyType, ValueType>
   static func fromArray(elements: Array<(KeyType, ValueType)>) -> _VariantDictionaryStorage<KeyType, ValueType>
 }
+func withUnsafePointer<T, Result>(inout arg: T, body: (UnsafePointer<T>) -> Result) -> Result
 protocol SignedNumber : _SignedNumber {
   func -(x: Self) -> Self
   func ~>(_: Self, _: (_Abs, ())) -> Self
 }
-@objc protocol _SwiftNSDictionary : _SwiftNSDictionaryRequiredOverrides {
+@unsafe_no_objc_tagged_pointer @objc protocol _SwiftNSDictionary : _SwiftNSDictionaryRequiredOverrides {
   @objc var allKeys: _SwiftNSArray { get }
   @objc func isEqual(anObject: AnyObject) -> Bool
 }
@@ -859,12 +940,69 @@ struct _IgnorePointer<T> : _PointerFunction {
   func call(_: UnsafePointer<T>)
   init()
 }
-typealias NilType = _Nil
 @asmname("swift_reflectAny") func reflect<T>(x: T) -> Mirror
-func max<T : Comparable>(x: T, y: T, rest: T...) -> T
+func max<T : Comparable>(x: T, y: T) -> T
+func max<T : Comparable>(x: T, y: T, z: T, rest: T...) -> T
+struct _RangeMirror<T : ForwardIndex> : Mirror {
+  var _value: Range<T>
+  init(_ x: Range<T>)
+  var value: Any {
+    get {}
+  }
+  var valueType: Any.Type {
+    get {}
+  }
+  var objectIdentifier: ObjectIdentifier? {
+    get {}
+  }
+  var count: Int {
+    get {}
+  }
+  subscript (i: Int) -> (String, Mirror) {
+    get {}
+  }
+  var summary: String {
+    get {}
+  }
+  var quickLookObject: QuickLookObject? {
+    get {}
+  }
+  var disposition: MirrorDisposition {
+    get {}
+  }
+}
+struct _ReverseRangeGeneratorMirror<T : BidirectionalIndex> : Mirror {
+  var _value: ReverseRangeGenerator<T>
+  init(_ x: ReverseRangeGenerator<T>)
+  var value: Any {
+    get {}
+  }
+  var valueType: Any.Type {
+    get {}
+  }
+  var objectIdentifier: ObjectIdentifier? {
+    get {}
+  }
+  var count: Int {
+    get {}
+  }
+  subscript (i: Int) -> (String, Mirror) {
+    get {}
+  }
+  var summary: String {
+    get {}
+  }
+  var quickLookObject: QuickLookObject? {
+    get {}
+  }
+  var disposition: MirrorDisposition {
+    get {}
+  }
+}
 let _x86_64SSERegisterWords: Int
-@transparent func _injectValueIntoImplicitlyUnwrappedOptional<T>(v: T) -> T!
 func _arrayAppendSequence<_Buffer : ArrayBufferType, S : Sequence where _Buffer.Element == _Buffer.Element>(inout buffer: _Buffer, newItems: S)
+@transparent func _injectValueIntoImplicitlyUnwrappedOptional<T>(v: T) -> T!
+@asmname("malloc_size") func _malloc_size(heapMemory: UnsafePointer<Void>) -> Int
 struct _Advance {
   init()
 }
@@ -903,6 +1041,7 @@ protocol Sink {
   typealias Element
   func put(x: Element)
 }
+@transparent func _convertInOutToPointerArgument<ToPointer : _Pointer>(from: RawPointer) -> ToPointer
 protocol MutableCollection : Collection {
   subscript (i: Self.IndexType) -> Self.GeneratorType.Element { get set }
 }
@@ -915,23 +1054,16 @@ protocol _BuiltinExtendedGraphemeClusterLiteralConvertible {
   class func _convertFromBuiltinExtendedGraphemeClusterLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> Self
 }
 typealias CDouble = Double
+@asmname("swift_int64ToString") func _int64ToStringImpl(buffer: UnsafePointer<CodeUnit>, bufferLength: UWord, value: Int64, radix: Int64, uppercase: Bool) -> UWord
 var _emptyStringBase: COpaquePointer {
   get {}
 }
-@asmname("swift_int64ToString") func _int64ToStringImpl(buffer: UnsafePointer<CodeUnit>, bufferLength: UWord, value: Int64, radix: Int64, uppercase: Bool) -> UWord
 func _stdlib_getTypeName<T>(value: T) -> String
 @asmname("swift_stdlib_dynamicCastToExistential1Unconditional") func _stdlib_dynamicCastToExistential1Unconditional<SourceType, DestType>(value: SourceType, _: DestType.Type) -> DestType
 @asmname("swift_doubleToString") func _doubleToStringImpl(buffer: UnsafePointer<CodeUnit>, bufferLength: UWord, value: Double) -> UWord
 protocol SignedInteger : _SignedInteger, Integer {
 }
 func dropLast<Seq : Sliceable where Seq.IndexType : BidirectionalIndex>(seq: Seq) -> Seq.SliceType
-@objc class HeapBufferStorage<Value, Element> : HeapBufferStorageBase {
-  typealias Buffer = HeapBuffer<Value, Element>
-  @objc deinit
-  func __getInstanceSizeAndAlignMask() -> (Int, Int)
-  init()
-}
-func _distanceTo<I>(end: I) -> (_Distance, (I))
 enum Character : _BuiltinExtendedGraphemeClusterLiteralConvertible, ExtendedGraphemeClusterLiteralConvertible, Equatable {
   case LargeRepresentation(OnHeap<String>)
   case SmallRepresentation(Int63)
@@ -942,7 +1074,15 @@ enum Character : _BuiltinExtendedGraphemeClusterLiteralConvertible, ExtendedGrap
   static func _smallSize(value: UInt64) -> Int
   static func _smallValue(value: Int63) -> UInt64
 }
+func _distanceTo<I>(end: I) -> (_Distance, (I))
 @transparent func sizeofValue<T>(_: T) -> Int
+@objc class HeapBufferStorage<Value, Element> : HeapBufferStorageBase {
+  typealias Buffer = HeapBuffer<Value, Element>
+  @objc deinit
+  func __getInstanceSizeAndAlignMask() -> (Int, Int)
+  init()
+}
+@transparent func _convertConstArrayToPointerArgument<FromElement, ToPointer : _Pointer>(arr: Array<FromElement>) -> (AnyObject?, ToPointer)
 @transparent func _canBeClass<T>(_: T.Type) -> Bool
 struct _NativeDictionaryStorage<KeyType : Hashable, ValueType> : _DictionaryStorage, Printable {
   typealias Owner = _NativeDictionaryStorageOwner<KeyType, ValueType>
@@ -1031,6 +1171,7 @@ struct _StringBufferIVars {
 protocol _Comparable {
   func <(lhs: Self, rhs: Self) -> Bool
 }
+@asmname("putchar") func _putchar(value: Int32) -> Int32
 protocol ArrayBound {
   typealias ArrayBoundType
   func getArrayBoundValue() -> ArrayBoundType
@@ -1051,21 +1192,10 @@ struct EmptyCollection<T> : Collection {
   }
   init()
 }
-@transparent func _convertAutoreleasingUnsafePointerToUnsafePointer<T>(p: AutoreleasingUnsafePointer<T>) -> UnsafePointer<T>
-var _replExitHandlers: _REPLExitHandler[]
-@asmname("write") func posix_write(fd: Int32, buf: RawPointer, sz: Int) -> Int
+var _replExitHandlers: [(_REPLExitHandler)]
 var C_ARGC: CInt
-struct CMutableVoidPointer : Equatable {
-  let owner: AnyObject?
-  let value: RawPointer
-  @transparent static func __inout_conversion<T>(inout scalar: T) -> CMutableVoidPointer
-  @transparent static func __inout_conversion<T>(inout a: Array<T>) -> CMutableVoidPointer
-  var scoped: Bool {
-    @transparent get {}
-  }
-  @transparent func withUnsafePointer<T, U>(f: UnsafePointer<T> -> U) -> U
-  init(owner: AnyObject?, value: RawPointer)
-}
+@transparent func _log10(x: Float) -> Float
+@transparent func _log10(x: Double) -> Double
 struct _CocoaArrayWrapper : Collection {
   var startIndex: Int {
     get {}
@@ -1088,12 +1218,23 @@ protocol Generator {
   typealias Element
   func next() -> Element?
 }
-func _arrayCheckedDownCast<Base, Derived>(a: Array<Base>) -> Derived[]?
-protocol _BuiltinCharacterLiteralConvertible {
-  class func _convertFromBuiltinCharacterLiteral(value: Int32) -> Self
+struct CFunctionPointer<T> : Equatable, Hashable, LogicValue, NilLiteralConvertible {
+  var value: COpaquePointer
+  init()
+  init(_ value: COpaquePointer)
+  static func null() -> CFunctionPointer<T>
+  @transparent func getLogicValue() -> Bool
+  var hashValue: Int {
+    get {}
+  }
+  @transparent static func convertFromNilLiteral() -> CFunctionPointer<T>
 }
 func print<T, TargetStream : OutputStream>(object: T, inout target: TargetStream)
 func print<T>(object: T)
+protocol _BuiltinCharacterLiteralConvertible {
+  class func _convertFromBuiltinCharacterLiteral(value: Int32) -> Self
+}
+func _createUniqueMutableBuffer<_Buffer : ArrayBufferType>(inout source: _Buffer, newCount: Int, minimumCapacity: Int = default) -> ContiguousArrayBuffer<_Buffer.Element>?
 struct Unmanaged<T> {
   var _value: @sil_unmanaged T
   @transparent init(_private: T)
@@ -1107,10 +1248,15 @@ struct Unmanaged<T> {
   @transparent func release()
   @transparent func autorelease() -> Unmanaged<T>
 }
-@transparent func _convertCOpaquePointerToCMutableVoidPointer(p: COpaquePointer) -> CMutableVoidPointer
+var C_ARGV: UnsafePointer<CString>
 func withUnsafePointers<A0, A1, Result>(inout arg0: A0, inout arg1: A1, body: (UnsafePointer<A0>, UnsafePointer<A1>) -> Result) -> Result
 func withUnsafePointers<A0, A1, A2, Result>(inout arg0: A0, inout arg1: A1, inout arg2: A2, body: (UnsafePointer<A0>, UnsafePointer<A1>, UnsafePointer<A2>) -> Result) -> Result
-var C_ARGV: UnsafePointer<CString>
+enum UTFDecodeResult {
+  case Result(UnicodeScalar)
+  case EmptyInput
+  case Error
+  func isEmptyInput() -> Bool
+}
 @objc class _NativeDictionaryStorageKeyNSEnumeratorBase : _NSSwiftEnumerator, _SwiftNSEnumerator {
   init(dummy: (Int, ()))
   func bridgingNextObject(dummy: ()) -> AnyObject?
@@ -1119,21 +1265,13 @@ var C_ARGV: UnsafePointer<CString>
   @objc deinit
 }
 func _extractOrCopyToNativeArrayBuffer<_Buffer : ArrayBufferType where _Buffer.Element == _Buffer.Element>(source: _Buffer) -> ContiguousArrayBuffer<_Buffer.Element>
-struct CConstVoidPointer : Equatable {
-  let owner: AnyObject?
-  let value: RawPointer
-  @transparent init(_ owner: AnyObject?, _ value: RawPointer)
-  @transparent static func __inout_conversion<T>(inout scalar: T) -> CConstVoidPointer
-  var scoped: Bool {
-    @transparent get {}
-  }
-  @transparent func withUnsafePointer<T, U>(f: UnsafePointer<T> -> U) -> U
-}
+@transparent func _ceil(x: Float) -> Float
+@transparent func _ceil(x: Double) -> Double
 @assignment @transparent func %=(inout lhs: Float, rhs: Float)
 @assignment @transparent func %=(inout lhs: Double, rhs: Double)
 @assignment @transparent func %=(inout lhs: Float80, rhs: Float80)
 @assignment @transparent func %=<T : _IntegerArithmetic>(inout lhs: T, rhs: T)
-struct StridedRangeGenerator<T : ForwardIndex> : Generator, Sequence {
+struct StridedRangeGenerator<T : ForwardIndex> : Generator, Sequence, Reflectable {
   typealias Element = T
   @transparent init(_ bounds: Range<T>, stride: T.DistanceType)
   func next() -> T?
@@ -1141,6 +1279,7 @@ struct StridedRangeGenerator<T : ForwardIndex> : Generator, Sequence {
   func generate() -> StridedRangeGenerator<T>
   var _bounds: Range<T>
   var _stride: T.DistanceType
+  func getMirror() -> Mirror
 }
 @asmname("swift_unsafeReflectAny") func unsafeReflect<T>(owner: NativeObject, ptr: UnsafePointer<T>) -> Mirror
 struct SliceBuffer<T> : ArrayBufferType {
@@ -1157,6 +1296,7 @@ struct SliceBuffer<T> : ArrayBufferType {
   var nativeBuffer: ContiguousArrayBuffer<T> {
     get {}
   }
+  func replace<C : Collection where T == T>(#subRange: Range<Int>, with insertCount: Int, elementsOf newValues: C)
   var identity: Word {
     get {}
   }
@@ -1164,7 +1304,8 @@ struct SliceBuffer<T> : ArrayBufferType {
   var start: UnsafePointer<T>
   var _countAndFlags: UInt
   func _asCocoaArray() -> _CocoaArray
-  func requestUniqueMutableBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func requestUniqueMutableBackingBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func isMutableAndUniquelyReferenced() -> Bool
   func requestNativeBuffer() -> ContiguousArrayBuffer<T>?
   func _uninitializedCopy(subRange: Range<Int>, target: UnsafePointer<T>) -> UnsafePointer<T>
   var elementStorage: UnsafePointer<T> {
@@ -1174,6 +1315,7 @@ struct SliceBuffer<T> : ArrayBufferType {
     get {}
     set {}
   }
+  func setLocalCount(newValue: Int)
   var capacity: Int {
     get {}
   }
@@ -1194,9 +1336,13 @@ struct SliceBuffer<T> : ArrayBufferType {
   func generate() -> IndexingGenerator<SliceBuffer<T>>
   func withUnsafePointerToElements<R>(body: (UnsafePointer<T>) -> R) -> R
 }
-@transparent func &%<T : _IntegerArithmetic>(lhs: T, rhs: T) -> T
 var _cocoaStringSlice: (target: _StringCore, subRange: Range<Int>) -> _StringCore
+@transparent func &%<T : _IntegerArithmetic>(lhs: T, rhs: T) -> T
+@noinline func _arrayOutOfPlaceReplace<B : ArrayBufferType, C : Collection where B.Element == B.Element, Int == Int>(inout source: B, subRange: Range<Int>, newValues: C, insertCount: Int)
 @transparent func &&(lhs: LogicValue, rhs: @auto_closure () -> LogicValue) -> Bool
+protocol NilLiteralConvertible {
+  class func convertFromNilLiteral() -> Self
+}
 func bridgeToObjectiveC<T>(x: T) -> AnyObject?
 struct ContiguousArray<T> : MutableCollection, Sliceable {
   typealias Element = T
@@ -1216,6 +1362,7 @@ struct ContiguousArray<T> : MutableCollection, Sliceable {
     get {}
     set(rhs) {}
   }
+  @noinline func makeUnique(inout buffer: ContiguousArrayBuffer<T>, e: T, index: Int)
   typealias _Buffer = ContiguousArrayBuffer<T>
   init(_ buffer: ContiguousArrayBuffer<T>)
   var _buffer: ContiguousArrayBuffer<T>
@@ -1227,7 +1374,7 @@ struct ContiguousArray<T> : MutableCollection, Sliceable {
 protocol Hashable : Equatable {
   var hashValue: Int { get }
 }
-func _arrayBridgeFromObjectiveC<Base, BridgesToDerived>(source: Array<Base>) -> Array<BridgesToDerived>?
+func _arrayBridgeFromObjectiveC<Base, BridgesToDerived>(source: Array<Base>) -> Array<BridgesToDerived>
 struct _CopyToNativeArrayBuffer {
   init()
 }
@@ -1270,11 +1417,22 @@ struct Int : SignedInteger {
   @transparent init()
   @transparent init(_ v: Word)
   @transparent init(_ value: Int)
+  @transparent init(bigEndian value: Int)
+  @transparent init(littleEndian value: Int)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> Int
   @transparent static func convertFromIntegerLiteral(value: Int) -> Int
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = Int
   func getArrayBoundValue() -> Int
+  var bigEndian: Int {
+    get {}
+  }
+  var littleEndian: Int {
+    get {}
+  }
+  var byteSwapped: Int {
+    get {}
+  }
   static var max: Int {
     @transparent get {}
   }
@@ -1288,18 +1446,18 @@ protocol UnsignedInteger : _UnsignedInteger, Integer {
   @objc init()
   @objc deinit
 }
+@noreturn @transparent func fatalError(message: StaticString, file: StaticString = default, line: UWord = default)
 struct MapSequenceView<Base : Sequence, T> : Sequence {
   func generate() -> MapSequenceGenerator<Base.GeneratorType, T>
   var _base: Base
   var _transform: (Base.GeneratorType.Element) -> T
   init(_base: Base, _transform: (Base.GeneratorType.Element) -> T)
 }
-@noreturn @transparent func fatalError(message: StaticString, file: StaticString = default, line: UWord = default)
 protocol _Sequence_ : _Sequence {
   typealias GeneratorType : Generator
   func generate() -> GeneratorType
 }
-@asmname("strcmp") func _strcmp(dest: CString, src: CString) -> Int
+@asmname("strcmp") func _strcmp(dest: CString, src: CString) -> CInt
 @transparent func _overflowChecked<T>(args: (T, Bool), file: StaticString = default, line: UWord = default) -> T
 struct GeneratorOf<T> : Generator, Sequence {
   init(_ next: () -> T?)
@@ -1334,10 +1492,10 @@ protocol _Collection : _Sequence {
   init(cocoa: _CocoaArray, needsElementTypeCheck: Bool)
   init<Target>(castFrom source: IndirectArrayBuffer, toElementType _: Target.Type)
   @final @final @final func replaceStorage<T>(newBuffer: ContiguousArrayBuffer<T>)
-  var buffer: AnyObject?
-  var isMutable: Bool
-  var isCocoa: Bool
-  var needsElementTypeCheck: Bool
+  @final @final @final var buffer: AnyObject?
+  @final @final @final var isMutable: Bool
+  @final @final @final var isCocoa: Bool
+  @final @final @final var needsElementTypeCheck: Bool
   @final @final @final func getNativeBufferOf<T>(_: T.Type) -> ContiguousArrayBuffer<T>
   @final @final @final func getCocoa() -> _CocoaArray
   @objc deinit
@@ -1361,7 +1519,7 @@ func _formatSignedInteger(value: Int64, radix: UInt64, ten: UnicodeScalar = defa
 func advance<T : ForwardIndex>(start: T, n: T.DistanceType) -> T
 func advance<T : ForwardIndex>(start: T, n: T.DistanceType, end: T) -> T
 typealias CLong = Int
-func getVaList(args: CVarArg[]) -> CVaListPointer
+func getVaList(args: [CVarArg]) -> CVaListPointer
 struct Float {
   var value: FPIEEE32
   @transparent init()
@@ -1373,11 +1531,22 @@ struct UInt : UnsignedInteger {
   @transparent init()
   @transparent init(_ v: Word)
   @transparent init(_ value: UInt)
+  @transparent init(bigEndian value: UInt)
+  @transparent init(littleEndian value: UInt)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> UInt
   @transparent static func convertFromIntegerLiteral(value: UInt) -> UInt
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = UInt
   func getArrayBoundValue() -> UInt
+  var bigEndian: UInt {
+    get {}
+  }
+  var littleEndian: UInt {
+    get {}
+  }
+  var byteSwapped: UInt {
+    get {}
+  }
   static var max: UInt {
     @transparent get {}
   }
@@ -1395,7 +1564,7 @@ protocol _BuiltinIntegerLiteralConvertible {
   class func _convertFromBuiltinIntegerLiteral(value: MaxBuiltinIntegerType) -> Self
 }
 func isBridgedToObjectiveC<T>(_: T.Type) -> Bool
-struct COpaquePointer : Equatable, Hashable, LogicValue {
+struct COpaquePointer : Equatable, Hashable, LogicValue, NilLiteralConvertible {
   var value: RawPointer
   init()
   init(_ v: RawPointer)
@@ -1407,6 +1576,7 @@ struct COpaquePointer : Equatable, Hashable, LogicValue {
   var hashValue: Int {
     get {}
   }
+  @transparent static func convertFromNilLiteral() -> COpaquePointer
 }
 protocol _BuiltinStringLiteralConvertible : _BuiltinExtendedGraphemeClusterLiteralConvertible {
   class func _convertFromBuiltinStringLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> Self
@@ -1417,6 +1587,8 @@ struct FilterSequenceView<Base : Sequence> : Sequence {
   var _include: (Base.GeneratorType.Element) -> Bool
   init(_base: Base, _include: (Base.GeneratorType.Element) -> Bool)
 }
+@objc @class_protocol protocol _CocoaString {
+}
 protocol ArrayBufferType : MutableCollection {
   typealias Element
   init()
@@ -1424,8 +1596,10 @@ protocol ArrayBufferType : MutableCollection {
   func _uninitializedCopy(subRange: Range<Int>, target: UnsafePointer<Element>) -> UnsafePointer<Element>
   func _asCocoaArray() -> _CocoaArray
   subscript (index: Int) -> Element { get set }
-  func requestUniqueMutableBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<Element>?
+  func requestUniqueMutableBackingBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<Element>?
+  func isMutableAndUniquelyReferenced() -> Bool
   func requestNativeBuffer() -> ContiguousArrayBuffer<Element>?
+  func replace<C : Collection where `Self`.Element == Element>(#subRange: Range<Int>, with newCount: Int, elementsOf newValues: C)
   subscript (subRange: Range<Int>) -> SliceBuffer<Element> { get }
   func withUnsafePointerToElements<R>(body: (UnsafePointer<Element>) -> R) -> R
   var count: Int { get set }
@@ -1434,12 +1608,39 @@ protocol ArrayBufferType : MutableCollection {
   var elementStorage: UnsafePointer<Element> { get }
   var identity: Word { get }
 }
-@objc @class_protocol protocol _CocoaString {
-}
 @noreturn func _assertionFailed(prefix: StaticString, message: StaticString, file: StaticString, line: UWord)
 @asmname("swift_keepAlive") func swift_keepAlive<T>(inout _: T)
-func encodeBitsAsWords<T : CVarArg>(x: T) -> Word[]
+struct _ReverseRangeMirror<T : BidirectionalIndex> : Mirror {
+  var _value: ReverseRange<T>
+  init(_ x: ReverseRange<T>)
+  var value: Any {
+    get {}
+  }
+  var valueType: Any.Type {
+    get {}
+  }
+  var objectIdentifier: ObjectIdentifier? {
+    get {}
+  }
+  var count: Int {
+    get {}
+  }
+  subscript (i: Int) -> (String, Mirror) {
+    get {}
+  }
+  var summary: String {
+    get {}
+  }
+  var quickLookObject: QuickLookObject? {
+    get {}
+  }
+  var disposition: MirrorDisposition {
+    get {}
+  }
+}
+func encodeBitsAsWords<T : CVarArg>(x: T) -> [Word]
 typealias CChar32 = UnicodeScalar
+func _transcodeSomeUTF16AsUTF8<Input : Collection where UInt16 == UInt16>(input: Input, startIndex: Input.IndexType) -> (Input.IndexType, UTF8Chunk)
 enum FloatingPointClassification {
   case SignalingNaN
   case QuietNaN
@@ -1455,20 +1656,12 @@ enum FloatingPointClassification {
     get {}
   }
 }
-struct CConstPointer<T> : Equatable {
-  let owner: AnyObject?
-  let value: RawPointer
-  @transparent init(_ owner: AnyObject?, _ value: RawPointer)
-  @transparent static func __inout_conversion(inout scalar: T) -> CConstPointer<T>
-  var scoped: Bool {
-    @transparent get {}
-  }
-  @transparent func withUnsafePointer<U>(f: UnsafePointer<T> -> U) -> U
-}
+@transparent func _exp(x: Float) -> Float
+@transparent func _exp(x: Double) -> Double
+@asmname("swift_reportUnimplementedInitializerInFile") func _reportUnimplementedInitializerInFile(className: RawPointer, classNameLength: Word, initName: RawPointer, initNameLength: Word, file: RawPointer, fileLength: Word, line: UWord, column: UWord)
 func minElement<R : Sequence where R.GeneratorType.Element : Comparable>(range: R) -> R.GeneratorType.Element
 func debugPrintln<T, TargetStream : OutputStream>(object: T, inout target: TargetStream)
 func debugPrintln<T>(object: T)
-@asmname("malloc_size") func c_malloc_size(heapMemory: UnsafePointer<Void>) -> Int
 typealias _HeapObject = HeapObject
 struct _Abs {
   init()
@@ -1493,7 +1686,8 @@ struct UInt8 : UnsignedInteger {
 }
 struct CString : _BuiltinExtendedGraphemeClusterLiteralConvertible, ExtendedGraphemeClusterLiteralConvertible, _BuiltinStringLiteralConvertible, StringLiteralConvertible, LogicValue {
   var _bytesPtr: UnsafePointer<UInt8>
-  @transparent init(_ _bytesPtr: UnsafePointer<UInt8>)
+  init(_ bytesPtr: UnsafePointer<UInt8>)
+  init(_ bytesPtr: UnsafePointer<CChar>)
   static func _convertFromBuiltinExtendedGraphemeClusterLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> CString
   static func convertFromExtendedGraphemeClusterLiteral(value: CString) -> CString
   static func _convertFromBuiltinStringLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> CString
@@ -1502,7 +1696,7 @@ struct CString : _BuiltinExtendedGraphemeClusterLiteralConvertible, ExtendedGrap
     @transparent get {}
   }
   @transparent func getLogicValue() -> Bool
-  func persist() -> CChar[]?
+  func persist() -> [CChar]?
 }
 typealias Float32 = Float
 func withExtendedLifetime<T, Result>(x: T, f: () -> Result) -> Result
@@ -1518,7 +1712,7 @@ struct UnicodeScalar : ExtendedGraphemeClusterLiteralConvertible {
   init(_ value: Int32)
   init(_ v: UInt32)
   init(_ v: UnicodeScalar)
-  func escape() -> String
+  func escape(#asASCII: Bool) -> String
   func isASCII() -> Bool
   func isAlpha() -> Bool
   func isDigit() -> Bool
@@ -1534,18 +1728,19 @@ struct UnicodeScalar : ExtendedGraphemeClusterLiteralConvertible {
   typealias NativeStorage = _NativeDictionaryStorage<KeyType, ValueType>
   typealias Index = _NativeDictionaryIndex<KeyType, ValueType>
   init(_ nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>)
-  var nextIndex: _NativeDictionaryIndex<KeyType, ValueType>
-  var endIndex: _NativeDictionaryIndex<KeyType, ValueType>
+  @final @final var nextIndex: _NativeDictionaryIndex<KeyType, ValueType>
+  @final @final var endIndex: _NativeDictionaryIndex<KeyType, ValueType>
   @final @final override func bridgingNextObject(dummy: ()) -> AnyObject?
   @objc deinit
 }
 typealias CUnsignedLongLong = UInt64
-func _quickSort<C : MutableCollection where C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>, inout less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
-func _quickSort<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>)
+func min<T : Comparable>(x: T, y: T) -> T
+func min<T : Comparable>(x: T, y: T, z: T, rest: T...) -> T
 @asmname("strcpy") func _strcpy(dest: CString, src: CString) -> CString
-func min<T : Comparable>(x: T, y: T, rest: T...) -> T
+func _quickSort<C : MutableCollection where C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>, inout less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
+func _quickSort<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>)
 struct FilterCollectionViewIndex<Base : Collection> : ForwardIndex {
-  func succ() -> FilterCollectionViewIndex<Base>
+  func successor() -> FilterCollectionViewIndex<Base>
   var _pos: Base.IndexType
   var _end: Base.IndexType
   var _base: Base
@@ -1566,13 +1761,15 @@ struct FilterCollectionViewIndex<Base : Collection> : ForwardIndex {
 @assignment @transparent func *=(inout lhs: Double, rhs: Double)
 @assignment @transparent func *=(inout lhs: Float80, rhs: Float80)
 @assignment @transparent func *=<T : _IntegerArithmetic>(inout lhs: T, rhs: T)
+@transparent func _trunc(x: Float) -> Float
+@transparent func _trunc(x: Double) -> Double
 typealias CBool = Bool
 struct _StringBuffer {
   typealias _Storage = HeapBuffer<_StringBufferIVars, CodeUnit>
   @conversion func __conversion() -> _Storage
   init(_ storage: _Storage)
   init(capacity: Int, initialSize: Int, elementWidth: Int)
-  init<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(encoding: Encoding.Type, input: Input, minimumCapacity: Int = default)
+  static func fromCodeUnits<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(encoding: Encoding.Type, input: Input, repairIllFormedSequences: Bool, minimumCapacity: Int = default) -> (_StringBuffer?, hadError: Bool)
   var start: UnsafePointer<RawByte> {
     get {}
   }
@@ -1600,23 +1797,12 @@ struct _StringBuffer {
   var _storage: _Storage
 }
 protocol _BidirectionalIndex : _ForwardIndex {
-  func pred() -> Self
+  func predecessor() -> Self
 }
 @asmname("swift_bridgeNonVerbatimToObjectiveC") func _bridgeNonVerbatimToObjectiveC<T>(x: T) -> AnyObject?
 @asmname("swift_isBridgedNonVerbatimToObjectiveC") func _isBridgedNonVerbatimToObjectiveC<T>(_: T.Type) -> Bool
 func _abs<Args>(args: Args) -> (_Abs, Args)
 @asmname("swift_uint64ToString") func _uint64ToStringImpl(buffer: UnsafePointer<CodeUnit>, bufferLength: UWord, value: UInt64, radix: Int64, uppercase: Bool) -> UWord
-@transparent func abs<T : SignedNumber>(x: T) -> T
-protocol Comparable : _Comparable, Equatable {
-  func <=(lhs: Self, rhs: Self) -> Bool
-  func >=(lhs: Self, rhs: Self) -> Bool
-  func >(lhs: Self, rhs: Self) -> Bool
-}
-struct EmptyGenerator<T> : Generator, Sequence {
-  func generate() -> EmptyGenerator<T>
-  func next() -> T?
-  init()
-}
 @assignment @transparent func ++(inout rhs: Float) -> Float
 @assignment @transparent @postfix func ++(inout lhs: Float) -> Float
 @assignment @transparent func ++(inout rhs: Double) -> Double
@@ -1625,6 +1811,17 @@ struct EmptyGenerator<T> : Generator, Sequence {
 @assignment @transparent @postfix func ++(inout lhs: Float80) -> Float80
 @assignment @transparent func ++<T : _Incrementable>(inout x: T) -> T
 @assignment @transparent @postfix func ++<T : _Incrementable>(inout x: T) -> T
+struct EmptyGenerator<T> : Generator, Sequence {
+  func generate() -> EmptyGenerator<T>
+  func next() -> T?
+  init()
+}
+protocol Comparable : _Comparable, Equatable {
+  func <=(lhs: Self, rhs: Self) -> Bool
+  func >=(lhs: Self, rhs: Self) -> Bool
+  func >(lhs: Self, rhs: Self) -> Bool
+}
+@transparent func abs<T : SignedNumber>(x: T) -> T
 struct Less<T : Comparable> {
   static func compare(x: T, _ y: T) -> Bool
   init()
@@ -1634,7 +1831,7 @@ struct Less<T : Comparable> {
   typealias NativeStorage = _NativeDictionaryStorage<KeyType, ValueType>
   init(minimumCapacity: Int = default)
   init(nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>)
-  var nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>
+  @final @final @final var nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>
   @final @final @final override var bridgingCount: (Int, ()) {
     @final @final @final get {}
   }
@@ -1656,7 +1853,8 @@ enum DictionaryGenerator<KeyType : Hashable, ValueType> : Generator {
   func _nativeNext() -> (KeyType, ValueType)?
   func next() -> (KeyType, ValueType)?
 }
-struct UnsafeArray<T> : Collection, Generator {
+typealias _DictionaryObjectsPointer = ConstUnsafePointer<AnyObject?>
+struct UnsafeArray<T> : Collection {
   var startIndex: Int {
     get {}
   }
@@ -1667,21 +1865,21 @@ struct UnsafeArray<T> : Collection, Generator {
     get {}
   }
   init(start: UnsafePointer<T>, length: Int)
-  func next() -> T?
-  func generate() -> UnsafeArray<T>
+  func generate() -> UnsafeArrayGenerator<T>
   var _position: UnsafePointer<T>
   var _end: UnsafePointer<T>
 }
-struct _Nil : Reflectable {
-  @conversion func __conversion<T : RawOptionSet>() -> T
-  func getMirror() -> Mirror
-  init()
-}
 protocol _Sliceable : Collection {
 }
-@assignment func +=<A : ArrayType, S : Sequence where S.GeneratorType.Element == S.GeneratorType.Element>(inout lhs: A, rhs: S)
-@assignment func +=<A : ArrayType, C : Collection where C.GeneratorType.Element == C.GeneratorType.Element>(inout lhs: A, rhs: C)
-@assignment func +=<A : ArrayType>(inout lhs: A, rhs: A._Buffer.Element)
+@assignment func +=<T, S : Sequence where T == T>(inout lhs: ContiguousArray<T>, rhs: S)
+@assignment func +=<T, C : Collection where T == T>(inout lhs: ContiguousArray<T>, rhs: C)
+@assignment func +=<T>(inout lhs: ContiguousArray<T>, rhs: T)
+@assignment func +=<T, S : Sequence where T == T>(inout lhs: Slice<T>, rhs: S)
+@assignment func +=<T, C : Collection where T == T>(inout lhs: Slice<T>, rhs: C)
+@assignment func +=<T>(inout lhs: Slice<T>, rhs: T)
+@assignment func +=<T, S : Sequence where T == T>(inout lhs: Array<T>, rhs: S)
+@assignment func +=<T, C : Collection where T == T>(inout lhs: Array<T>, rhs: C)
+@assignment func +=<T>(inout lhs: Array<T>, rhs: T)
 func +=<T, C : Collection where T == T>(inout lhs: ContiguousArrayBuffer<T>, rhs: C)
 func +=<T>(inout lhs: ContiguousArrayBuffer<T>, rhs: T)
 @assignment @transparent func +=(inout lhs: UInt8, rhs: UInt8)
@@ -1701,19 +1899,21 @@ func +=<T>(inout lhs: ContiguousArrayBuffer<T>, rhs: T)
 @assignment func +=(inout lhs: String, rhs: String)
 @assignment func +=(inout lhs: String, rhs: Character)
 @assignment @transparent func +=<T>(inout lhs: UnsafePointer<T>, rhs: Int)
+@assignment @transparent func +=<T>(inout lhs: ConstUnsafePointer<T>, rhs: Int)
 @transparent func ...<Pos : ForwardIndex>(min: Pos, max: Pos) -> Range<Pos>
-func split<Seq : Sliceable, R : LogicValue>(seq: Seq, isSeparator: (Seq.GeneratorType.Element) -> R, maxSplit: Int = default, allowEmptySlices: Bool = default) -> Seq.SliceType[]
-func withVaList<R>(args: CVarArg[], f: (CVaListPointer) -> R) -> R
+func split<Seq : Sliceable, R : LogicValue>(seq: Seq, isSeparator: (Seq.GeneratorType.Element) -> R, maxSplit: Int = default, allowEmptySlices: Bool = default) -> [Seq.SliceType]
+func withVaList<R>(args: [CVarArg], f: (CVaListPointer) -> R) -> R
 func withVaList<R>(builder: VaListBuilder, f: (CVaListPointer) -> R) -> R
-@transparent func _convertCConstVoidPointerToCOpaquePointer(p: CConstVoidPointer) -> COpaquePointer
 typealias IntMax = Int64
 protocol _IntegerArithmetic {
-  class func uncheckedAdd(lhs: Self, _ rhs: Self) -> (Self, Bool)
-  class func uncheckedSubtract(lhs: Self, _ rhs: Self) -> (Self, Bool)
-  class func uncheckedMultiply(lhs: Self, _ rhs: Self) -> (Self, Bool)
-  class func uncheckedDivide(lhs: Self, _ rhs: Self) -> (Self, Bool)
-  class func uncheckedModulus(lhs: Self, _ rhs: Self) -> (Self, Bool)
+  class func addWithOverflow(lhs: Self, _ rhs: Self) -> (Self, overflow: Bool)
+  class func subtractWithOverflow(lhs: Self, _ rhs: Self) -> (Self, overflow: Bool)
+  class func multiplyWithOverflow(lhs: Self, _ rhs: Self) -> (Self, overflow: Bool)
+  class func divideWithOverflow(lhs: Self, _ rhs: Self) -> (Self, overflow: Bool)
+  class func modulusWithOverflow(lhs: Self, _ rhs: Self) -> (Self, overflow: Bool)
 }
+@asmname("swift_bridgeNonVerbatimFromObjectiveCConditional") func _bridgeNonVerbatimFromObjectiveCConditional<T>(x: AnyObject, nativeType: T.Type) -> T?
+@transparent func ..<<Pos : ForwardIndex>(min: Pos, max: Pos) -> Range<Pos>
 protocol _Sequence {
 }
 struct RawByte {
@@ -1721,8 +1921,8 @@ struct RawByte {
   init(_inaccessible: UInt8)
 }
 struct _Process {
-  static var _arguments: String[]
-  var arguments: String[] {
+  static var _arguments: [String]
+  var arguments: [String] {
     get {}
   }
   init()
@@ -1745,12 +1945,10 @@ struct Array<T> : MutableCollection, Sliceable {
     get {}
     set(rhs) {}
   }
+  @noinline func makeUnique(inout buffer: ArrayBuffer<T>, e: T, index: Int)
   typealias _Buffer = ArrayBuffer<T>
   init(_ buffer: ArrayBuffer<T>)
   var _buffer: ArrayBuffer<T>
-}
-var nil: NilType {
-  get {}
 }
 struct MapCollectionView<Base : Collection, T> : Collection {
   var startIndex: Base.IndexType {
@@ -1792,7 +1990,7 @@ struct ReverseView<T : Collection where T.IndexType : BidirectionalIndex> : Coll
   var _base: T
 }
 protocol _Incrementable : Equatable {
-  func succ() -> Self
+  func successor() -> Self
 }
 struct ObjectIdentifier : Hashable {
   let value: RawPointer
@@ -1802,6 +2000,9 @@ struct ObjectIdentifier : Hashable {
   }
   init(_ x: AnyObject)
 }
+struct _PreprocessingPass {
+  init()
+}
 @assignment @transparent func --(inout rhs: Float) -> Float
 @assignment @transparent @postfix func --(inout lhs: Float) -> Float
 @assignment @transparent func --(inout rhs: Double) -> Double
@@ -1810,9 +2011,6 @@ struct ObjectIdentifier : Hashable {
 @assignment @transparent @postfix func --(inout lhs: Float80) -> Float80
 @assignment @transparent func --<T : _BidirectionalIndex>(inout x: T) -> T
 @assignment @transparent @postfix func --<T : _BidirectionalIndex>(inout x: T) -> T
-struct _PreprocessingPass {
-  init()
-}
 func dropFirst<Seq : Sliceable>(seq: Seq) -> Seq.SliceType
 struct _DictionaryElement<KeyType : Hashable, ValueType> {
   let key: KeyType
@@ -1848,27 +2046,19 @@ struct _OptionalMirror<T> : Mirror {
     get {}
   }
 }
-typealias Float64 = Double
 protocol _ArrayType : Collection {
   var count: Int { get }
   typealias _Buffer : ArrayBufferType
   var _buffer: _Buffer { get }
 }
+typealias Float64 = Double
+func _uint64ToString(value: UInt64, radix: Int64 = default, uppercase: Bool = default) -> String
 @objc class _NSSwiftDictionary {
   @objc init()
   @objc deinit
 }
-func _uint64ToString(value: UInt64, radix: Int64 = default, uppercase: Bool = default) -> String
 struct _CountElements {
   init()
-}
-class LifetimeManager {
-  var _managedRefs: NativeObject[]
-  var _releaseCalled: Bool
-  init()
-  @objc deinit
-  func put(objPtr: NativeObject)
-  func release()
 }
 @assignment @transparent func -=(inout lhs: UInt8, rhs: UInt8)
 @assignment @transparent func -=(inout lhs: Int8, rhs: Int8)
@@ -1885,6 +2075,15 @@ class LifetimeManager {
 @assignment @transparent func -=(inout lhs: Float80, rhs: Float80)
 @assignment @transparent func -=<T : _IntegerArithmetic>(inout lhs: T, rhs: T)
 @assignment @transparent func -=<T>(inout lhs: UnsafePointer<T>, rhs: Int)
+@assignment @transparent func -=<T>(inout lhs: ConstUnsafePointer<T>, rhs: Int)
+class LifetimeManager {
+  var _managedRefs: [NativeObject]
+  var _releaseCalled: Bool
+  init()
+  @objc deinit
+  func put(objPtr: NativeObject)
+  func release()
+}
 @transparent func _isDebugAssertConfiguration() -> Bool
 typealias CUnsignedLong = UInt
 struct _CocoaDictionaryIndex : BidirectionalIndex {
@@ -1895,32 +2094,32 @@ struct _CocoaDictionaryIndex : BidirectionalIndex {
   init(_ cocoaDictionary: _SwiftNSDictionary, startIndex: ())
   init(_ cocoaDictionary: _SwiftNSDictionary, endIndex: ())
   init(_ cocoaDictionary: _SwiftNSDictionary, _ allKeys: _SwiftNSArray, _ nextKeyIndex: Int)
-  func pred() -> Index
-  func succ() -> Index
+  func predecessor() -> Index
+  func successor() -> Index
 }
 @transparent func _debugPrecondition(condition: @auto_closure () -> Bool, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 @transparent func _debugPrecondition<T : LogicValue>(condition: @auto_closure () -> T, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 struct ReverseIndex<I : BidirectionalIndex> : BidirectionalIndex {
   var _base: I
   init(_ _base: I)
-  func succ() -> ReverseIndex<I>
-  func pred() -> ReverseIndex<I>
+  func successor() -> ReverseIndex<I>
+  func predecessor() -> ReverseIndex<I>
 }
-func _ContiguousArrayExtend<T, S : Sequence where T == T>(inout a: ContiguousArray<T>, sequence: S)
-func bridgeFromObjectiveCUnconditional<T>(x: AnyObject, _: T.Type) -> T
 func dump<T, TargetStream : OutputStream>(x: T, name: String? = default, indent: Int = default, maxDepth: Int = default, maxItems: Int = default, inout targetStream: TargetStream) -> T
 func dump<T>(x: T, name: String? = default, indent: Int = default, maxDepth: Int = default, maxItems: Int = default) -> T
+func _ContiguousArrayExtend<T, S : Sequence where T == T>(inout a: ContiguousArray<T>, sequence: S)
 func _arrayReserve<_Buffer : ArrayBufferType>(inout buffer: _Buffer, minimumCapacity: Int)
 func _preprocessingPass<Args>(args: Args) -> (_PreprocessingPass, Args)
-@transparent func ..<Pos : ForwardIndex>(min: Pos, max: Pos) -> Range<Pos>
+@availability(*, unavailable, message="half-open range operator .. has been renamed to ..<") @transparent func ..<Pos : ForwardIndex>(min: Pos, max: Pos) -> Range<Pos>
 protocol DictionaryLiteralConvertible {
   typealias Key
   typealias Value
   class func convertFromDictionaryLiteral(elements: (Key, Value)...) -> Self
 }
-@asmname("swift_bridgeNonVerbatimFromObjectiveC") func _bridgeNonVerbatimFromObjectiveC<T>(x: AnyObject, nativeType: T.Type) -> T?
+@transparent func _log(x: Float) -> Float
+@transparent func _log(x: Double) -> Double
+@asmname("swift_bridgeNonVerbatimFromObjectiveC") func _bridgeNonVerbatimFromObjectiveC<T>(x: AnyObject, nativeType: T.Type) -> T
 func _countElements<Args>(a: Args) -> (_CountElements, Args)
-func _arrayBridgeToObjectiveC<BridgesToDerived, Base>(source: Array<BridgesToDerived>) -> Array<Base>
 protocol _ForwardIndex : _Incrementable {
   typealias DistanceType : _SignedInteger = Int
 }
@@ -1928,6 +2127,7 @@ protocol Collection : _Collection, Sequence {
   subscript (i: Self.IndexType) -> Self.GeneratorType.Element { get }
   func ~>(_: Self, _: (_CountElements, ())) -> Self.IndexType.DistanceType
 }
+func _arrayBridgeToObjectiveC<BridgesToDerived, Base>(source: Array<BridgesToDerived>) -> Array<Base>
 func getBridgedObjectiveCType<T>(_: T.Type) -> Any.Type?
 func debugPrint<T, TargetStream : OutputStream>(object: T, inout target: TargetStream)
 func debugPrint<T>(object: T)
@@ -1937,8 +2137,8 @@ struct _NativeDictionaryIndex<KeyType : Hashable, ValueType> : BidirectionalInde
   var nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>
   var offset: Int
   init(nativeStorage: _NativeDictionaryStorage<KeyType, ValueType>, offset: Int)
-  func pred() -> _NativeDictionaryIndex<KeyType, ValueType>
-  func succ() -> _NativeDictionaryIndex<KeyType, ValueType>
+  func predecessor() -> _NativeDictionaryIndex<KeyType, ValueType>
+  func successor() -> _NativeDictionaryIndex<KeyType, ValueType>
 }
 struct Double {
   var value: FPIEEE64
@@ -1981,16 +2181,15 @@ struct Float80 {
   @transparent init(_ value: Float80)
 }
 func _cocoaStringLengthNotInitialized(source: _CocoaString) -> Int
-func _cocoaStringEncodeSomeUTF8NotInitialized(target: _StringCore, position: Int) -> (Int, UTF8Chunk)
-@objc protocol _SwiftNSArray : _SwiftNSArrayRequiredOverrides {
-  @objc func indexOfObject(anObject: AnyObject) -> Int
-}
+func _dictionaryUpCast<DerivedKey, DerivedValue, BaseKey, BaseValue>(source: Dictionary<DerivedKey, DerivedValue>) -> Dictionary<BaseKey, BaseValue>
 @assignment @transparent func /=(inout lhs: Float, rhs: Float)
 @assignment @transparent func /=(inout lhs: Double, rhs: Double)
 @assignment @transparent func /=(inout lhs: Float80, rhs: Float80)
 @assignment @transparent func /=<T : _IntegerArithmetic>(inout lhs: T, rhs: T)
+@unsafe_no_objc_tagged_pointer @objc protocol _SwiftNSArray : _SwiftNSArrayRequiredOverrides {
+  @objc func indexOfObject(anObject: AnyObject) -> Int
+}
 var _cocoaStringToContiguous: (source: _CocoaString, range: Range<Int>, minimumCapacity: Int) -> _StringBuffer
-func maxElement<R : Sequence where R.GeneratorType.Element : Comparable>(range: R) -> R.GeneratorType.Element
 func join<C : ExtensibleCollection, S : Sequence where C == C>(separator: C, elements: S) -> C
 struct _ClassMirror : Mirror {
   let data: _MagicMirrorData
@@ -2020,6 +2219,12 @@ struct _ClassMirror : Mirror {
   }
   init(data: _MagicMirrorData)
 }
+func maxElement<R : Sequence where R.GeneratorType.Element : Comparable>(range: R) -> R.GeneratorType.Element
+func sorted<C : MutableCollection where C.IndexType : RandomAccessIndex>(source: C, predicate: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool) -> C
+func sorted<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : RandomAccessIndex>(source: C) -> C
+func sorted<S : Sequence>(source: S, predicate: (S.GeneratorType.Element, S.GeneratorType.Element) -> Bool) -> [S.GeneratorType.Element]
+func sorted<S : Sequence where S.GeneratorType.Element : Comparable>(source: S) -> [S.GeneratorType.Element]
+typealias _DictionaryKeysPointer = ConstUnsafePointer<Void>
 func _arrayOutOfPlaceUpdate<_Buffer : ArrayBufferType, Initializer : _PointerFunction where Initializer.Element == Initializer.Element>(inout source: _Buffer, inout dest: ContiguousArrayBuffer<Initializer.Element>?, headCount: Int, newCount: Int, initializeNewElements: Initializer)
 @final class VaListBuilder {
   struct Header {
@@ -2033,10 +2238,10 @@ func _arrayOutOfPlaceUpdate<_Buffer : ArrayBufferType, Initializer : _PointerFun
   init()
   @final @final func append(arg: CVarArg)
   @final @final func va_list() -> CVaListPointer
-  var gpRegistersUsed
-  var sseRegistersUsed
-  var header
-  var storage: Word[]
+  @final @final var gpRegistersUsed
+  @final @final var sseRegistersUsed
+  @final @final @final var header
+  @final @final var storage: [Word]
   @objc deinit
 }
 @transparent func strideofValue<T>(_: T) -> Int
@@ -2123,10 +2328,7 @@ struct GeneratorSequence<G : Generator> : Generator, Sequence {
 protocol Streamable {
   func writeTo<Target : OutputStream>(inout target: Target)
 }
-@asmname("swift_replOutputIsUTF8") func _isUTF8() -> Bool
 typealias CLongLong = Int64
-func quickSort<C : MutableCollection where C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>, less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
-func quickSort<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>)
 struct _OpaqueMirror : Mirror {
   let data: _MagicMirrorData
   var value: Any {
@@ -2155,18 +2357,58 @@ struct _OpaqueMirror : Mirror {
   }
   init(data: _MagicMirrorData)
 }
+func quickSort<C : MutableCollection where C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>, less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
+func quickSort<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>)
 func isBridgedVerbatimToObjectiveC<T>(_: T.Type) -> Bool
+struct ConstUnsafePointer<T> : BidirectionalIndex, Comparable, Hashable, LogicValue, NilLiteralConvertible, _Pointer {
+  var value: RawPointer
+  init()
+  init(_ value: RawPointer)
+  init(_ other: COpaquePointer)
+  init(_ value: Int)
+  init<U>(_ from: UnsafePointer<U>)
+  init<U>(_ from: ConstUnsafePointer<U>)
+  @transparent static func convertFromNilLiteral() -> ConstUnsafePointer<T>
+  static func null() -> ConstUnsafePointer<T>
+  var memory: T {
+    @transparent get {}
+  }
+  var _isNull: Bool {
+    @transparent get {}
+  }
+  @transparent func getLogicValue() -> Bool
+  subscript (i: Int) -> T {
+    @transparent get {}
+  }
+  func withUnsafePointer<R>(f: UnsafePointer<T> -> R) -> R
+  var hashValue: Int {
+    get {}
+  }
+  func successor() -> ConstUnsafePointer<T>
+  func predecessor() -> ConstUnsafePointer<T>
+}
 @transparent func countLeadingZeros(value: Int64) -> Int64
 struct Int16 : SignedInteger {
   var value: Int16
   @transparent init()
   @transparent init(_ v: Int16)
   @transparent init(_ value: Int16)
+  @transparent init(bigEndian value: Int16)
+  @transparent init(littleEndian value: Int16)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> Int16
   @transparent static func convertFromIntegerLiteral(value: Int16) -> Int16
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = Int16
   func getArrayBoundValue() -> Int16
+  var bigEndian: Int16 {
+    get {}
+  }
+  var littleEndian: Int16 {
+    get {}
+  }
+  var byteSwapped: Int16 {
+    get {}
+  }
   static var max: Int16 {
     @transparent get {}
   }
@@ -2174,6 +2416,8 @@ struct Int16 : SignedInteger {
     @transparent get {}
   }
 }
+@transparent func _log2(x: Float) -> Float
+@transparent func _log2(x: Double) -> Double
 @asmname("strlen") func _strlen(arg: CString) -> Int
 protocol Sequence : _Sequence_ {
   typealias GeneratorType : Generator
@@ -2238,17 +2482,15 @@ struct Slice<T> : MutableCollection, Sliceable {
     get {}
     set(rhs) {}
   }
+  @noinline func makeUnique(inout buffer: SliceBuffer<T>, e: T, index: Int)
   typealias _Buffer = SliceBuffer<T>
   init(_ buffer: SliceBuffer<T>)
   var _buffer: SliceBuffer<T>
 }
 func _cocoaStringToContiguousNotInitialized(source: _CocoaString, range: Range<Int>, minimumCapacity: Int) -> _StringBuffer
-struct AutoreleasingUnsafePointer<T> : Equatable, LogicValue {
+struct AutoreleasingUnsafePointer<T> : Equatable, LogicValue, NilLiteralConvertible, _Pointer {
   let value: RawPointer
   @transparent init(_ value: RawPointer)
-  @transparent static func __writeback_conversion_get(x: T) -> RawPointer
-  @transparent static func __writeback_conversion_set(x: RawPointer) -> T
-  @transparent static func __writeback_conversion(inout autoreleasingTemp: RawPointer) -> AutoreleasingUnsafePointer<T>
   var _isNull: Bool {
     @transparent get {}
   }
@@ -2257,26 +2499,45 @@ struct AutoreleasingUnsafePointer<T> : Equatable, LogicValue {
     @transparent get {}
     @transparent set {}
   }
+  subscript (i: Int) -> T {
+    @transparent get {}
+  }
+  @transparent static func convertFromNilLiteral() -> AutoreleasingUnsafePointer<T>
+  @transparent static func null() -> AutoreleasingUnsafePointer<T>
+  @transparent init()
+  @transparent init<U>(_ ptr: UnsafePointer<U>)
+  @transparent init<U>(_ ptr: ConstUnsafePointer<U>)
 }
 protocol CharacterLiteralConvertible {
   typealias CharacterLiteralType : _BuiltinCharacterLiteralConvertible
   class func convertFromCharacterLiteral(value: CharacterLiteralType) -> Self
 }
-@noreturn func _unimplemented_initializer(className: StaticString, file: StaticString = default, line: UWord = default, column: UWord = default, initName: StaticString = default)
+@noreturn @transparent func _unimplemented_initializer(className: StaticString, initName: StaticString = default, file: StaticString = default, line: UWord = default, column: UWord = default)
 func _isClassOrObjCExistential<T>(x: T.Type) -> Bool
 @transparent func alignofValue<T>(_: T) -> Int
+func _forceCreateUniqueMutableBuffer<_Buffer : ArrayBufferType>(inout source: _Buffer, newCount: Int, requiredCapacity: Int) -> ContiguousArrayBuffer<_Buffer.Element>
+struct _CollectionOf<IndexType_ : ForwardIndex, T> : Collection {
+  init(startIndex: IndexType_, endIndex: IndexType_, _ subscriptImpl: (IndexType_) -> T)
+  func generate() -> GeneratorOf<T>
+  let startIndex: IndexType_
+  let endIndex: IndexType_
+  subscript (i: IndexType_) -> T {
+    get {}
+  }
+  let _subscriptImpl: (IndexType_) -> T
+}
 @final class _CocoaDictionaryGenerator : Generator {
-  let cocoaDictionary: _SwiftNSDictionary
-  var fastEnumerationState
-  var fastEnumerationStackBuf
-  var itemIndex: Int
-  var itemCount: Int
+  @final @final @final let cocoaDictionary: _SwiftNSDictionary
+  @final @final @final var fastEnumerationState
+  @final @final @final var fastEnumerationStackBuf
+  @final @final @final var itemIndex: Int
+  @final @final @final var itemCount: Int
   init(_ cocoaDictionary: _SwiftNSDictionary)
   @final @final @final func next() -> (AnyObject, AnyObject)?
   @objc deinit
 }
 func _underestimateCount<Args>(args: Args) -> (_UnderestimateCount, Args)
-enum Optional<T> : LogicValue, Reflectable {
+enum Optional<T> : LogicValue, Reflectable, NilLiteralConvertible {
   case None
   case Some(T)
   init()
@@ -2284,6 +2545,7 @@ enum Optional<T> : LogicValue, Reflectable {
   @transparent func getLogicValue() -> Bool
   func map<U>(f: (T) -> U) -> U?
   func getMirror() -> Mirror
+  @transparent static func convertFromNilLiteral() -> Optional<T>
 }
 struct _REPLExitHandler {
   var f: () -> ()
@@ -2294,11 +2556,22 @@ struct Int32 : SignedInteger {
   @transparent init()
   @transparent init(_ v: Int32)
   @transparent init(_ value: Int32)
+  @transparent init(bigEndian value: Int32)
+  @transparent init(littleEndian value: Int32)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> Int32
   @transparent static func convertFromIntegerLiteral(value: Int32) -> Int32
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = Int32
   func getArrayBoundValue() -> Int32
+  var bigEndian: Int32 {
+    get {}
+  }
+  var littleEndian: Int32 {
+    get {}
+  }
+  var byteSwapped: Int32 {
+    get {}
+  }
   static var max: Int32 {
     @transparent get {}
   }
@@ -2307,6 +2580,7 @@ struct Int32 : SignedInteger {
   }
 }
 typealias Void = ()
+func bridgeFromObjectiveCConditional<T>(x: AnyObject, _: T.Type) -> T?
 typealias CShort = Int16
 protocol _BuiltinFloatLiteralConvertible {
   class func _convertFromBuiltinFloatLiteral(value: MaxBuiltinFloatType) -> Self
@@ -2317,8 +2591,8 @@ typealias AnyClass = AnyObject.Type
 enum Bit : Int, RandomAccessIndex {
   case zero
   case one
-  func succ() -> Bit
-  func pred() -> Bit
+  func successor() -> Bit
+  func predecessor() -> Bit
   func distanceTo(other: Bit) -> Int
   func advancedBy(distance: Int) -> Bit
   var hashValue: Int {
@@ -2355,6 +2629,7 @@ struct _ClassSuperMirror : Mirror {
   }
   init(data: _MagicMirrorData)
 }
+func _arrayDownCast<Base, Derived>(a: Array<Base>) -> [Derived]
 protocol ArrayType : _ArrayType, ExtensibleCollection, MutableSliceable, ArrayLiteralConvertible {
   init()
   init(count: Int, repeatedValue: Self.GeneratorType.Element)
@@ -2366,7 +2641,9 @@ protocol ArrayType : _ArrayType, ExtensibleCollection, MutableSliceable, ArrayLi
   subscript (index: Int) -> Self.GeneratorType.Element { get set }
   func reserveCapacity(minimumCapacity: Int)
   func append(newElement: Self.GeneratorType.Element)
+  @assignment func +=(inout lhs: Self, rhs: Self.GeneratorType.Element)
   func extend<S : Sequence where `Self`.GeneratorType.Element == Self.GeneratorType.Element>(sequence: S)
+  @assignment func +=<S : Sequence where `Self`.GeneratorType.Element == Self.GeneratorType.Element>(inout lhs: Self, rhs: S)
   func removeLast() -> Self.GeneratorType.Element
   func insert(newElement: Self.GeneratorType.Element, atIndex: Int)
   func removeAtIndex(index: Int) -> Self.GeneratorType.Element
@@ -2376,7 +2653,21 @@ protocol ArrayType : _ArrayType, ExtensibleCollection, MutableSliceable, ArrayLi
   func sort(isOrderedBefore: (Self.GeneratorType.Element, Self.GeneratorType.Element) -> Bool)
   typealias _Buffer : ArrayBufferType
   init(_ buffer: _Buffer)
-  var _buffer: _Buffer { get set }
+}
+struct CollectionOfOne<T> : Collection {
+  typealias IndexType = Bit
+  init(_ element: T)
+  var startIndex: IndexType {
+    get {}
+  }
+  var endIndex: IndexType {
+    get {}
+  }
+  func generate() -> GeneratorOfOne<T>
+  subscript (i: IndexType) -> T {
+    get {}
+  }
+  let element: T
 }
 struct Int8 : SignedInteger {
   var value: Int8
@@ -2395,28 +2686,18 @@ struct Int8 : SignedInteger {
     @transparent get {}
   }
 }
-struct CollectionOfOne<T> : Collection {
-  typealias IndexType = Bit
-  init(_ element: T)
-  var startIndex: IndexType {
-    get {}
-  }
-  var endIndex: IndexType {
-    get {}
-  }
-  func generate() -> GeneratorOfOne<T>
-  subscript (i: IndexType) -> T {
-    get {}
-  }
-  let element: T
-}
 struct UTF8 : UnicodeCodec {
   typealias CodeUnit = UInt8
-  static func decode<G : Generator where CodeUnit == CodeUnit>(inout next: G) -> UnicodeScalar?
+  init()
+  static func _numTrailingBytes(cu0: CodeUnit) -> UInt8
+  var _decodeLookahead: UInt32
+  var _lookaheadFlags: UInt8
+  static func _isValidUTF8Impl(buffer: UInt32, length: UInt8) -> Bool
+  static func _isValidUTF8(buffer: UInt32, validBytes: UInt8) -> Bool
+  @noinline static func _findMaximalSubpartOfIllFormedUTF8Sequence(buffer: UInt32, validBytes: UInt8) -> UInt8
+  func decode<G : Generator where CodeUnit == CodeUnit>(inout next: G) -> UTFDecodeResult
   static func encode<S : Sink where CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
   var _value
-  init(_value: UInt8)
-  init()
 }
 enum QuickLookObject {
   case Text(String)
@@ -2436,7 +2717,7 @@ enum QuickLookObject {
   case View(Any)
   case Sprite(Any)
   case URL(String)
-  case _Raw(UInt8[], String)
+  case _Raw([UInt8], String)
 }
 struct ContiguousArrayBuffer<T> : ArrayBufferType, LogicValue {
   init(count: Int, minimumCapacity: Int)
@@ -2453,8 +2734,10 @@ struct ContiguousArrayBuffer<T> : ArrayBufferType, LogicValue {
   typealias Element = T
   init()
   init(_ buffer: ContiguousArrayBuffer<T>)
-  func requestUniqueMutableBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func requestUniqueMutableBackingBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func isMutableAndUniquelyReferenced() -> Bool
   func requestNativeBuffer() -> ContiguousArrayBuffer<T>?
+  func replace<C : Collection where T == T>(#subRange: Range<Int>, with newCount: Int, elementsOf newValues: C)
   subscript (i: Int) -> T {
     get {}
     set {}
@@ -2559,11 +2842,13 @@ struct HeapBuffer<Value, Element> : LogicValue, Equatable {
   static func fromNativeObject(x: NativeObject) -> HeapBuffer<Value, Element>
   func isUniquelyReferenced() -> Bool
 }
-func partition<C : MutableCollection where C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>, inout less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool) -> C.IndexType
-func partition<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : SignedInteger>(inout elements: C, range: Range<C.IndexType>) -> C.IndexType
+func partition<C : MutableCollection where C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>, inout less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool) -> C.IndexType
+func partition<C : MutableCollection where C.GeneratorType.Element : Comparable, C.IndexType : RandomAccessIndex>(inout elements: C, range: Range<C.IndexType>) -> C.IndexType
 @asmname("swift_ClassMirror_count") func _getClassCount(_: _MagicMirrorData) -> Int
-func sort<T>(array: T[], pred: (T, T) -> Bool) -> T[]
-func sort<T : Comparable>(array: T[]) -> T[]
+func sort<C : MutableCollection where C.IndexType : RandomAccessIndex>(inout collection: C, predicate: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
+func sort<C : MutableCollection where C.IndexType : RandomAccessIndex, C.GeneratorType.Element : Comparable>(inout collection: C)
+func sort<T>(inout array: [T], predicate: (T, T) -> Bool)
+func sort<T : Comparable>(inout array: [T])
 struct _Distance {
   init()
 }
@@ -2580,17 +2865,19 @@ protocol _BridgedToObjectiveC {
   typealias ObjectiveCType
   class func getObjectiveCType() -> Any.Type
   func bridgeToObjectiveC() -> ObjectiveCType
-  class func bridgeFromObjectiveC(source: ObjectiveCType) -> Self?
+  class func bridgeFromObjectiveC(source: ObjectiveCType) -> Self
 }
 @transparent func _sanityCheck(condition: @auto_closure () -> Bool, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 @transparent func _sanityCheck<T : LogicValue>(condition: @auto_closure () -> T, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 struct UTF16 : UnicodeCodec {
   typealias CodeUnit = UInt16
-  static func decode<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> UnicodeScalar?
+  init()
+  var _decodeLookahead: UInt32
+  var _lookaheadFlags: UInt8
+  func decode<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> UTFDecodeResult
+  func _decodeOne<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> (UTFDecodeResult, Int)
   static func encode<S : Sink where CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
   var _value
-  init(_value: UInt16)
-  init()
 }
 protocol Reflectable {
   func getMirror() -> Mirror
@@ -2602,23 +2889,35 @@ struct OnHeap<T> {
   @conversion func __conversion() -> T
   var _storage: HeapBuffer<T, Void>
 }
-@transparent func _convertUnsafePointerToAutoreleasingUnsafePointer<T>(p: UnsafePointer<T>) -> AutoreleasingUnsafePointer<T>
+@transparent func _floor(x: Float) -> Float
+@transparent func _floor(x: Double) -> Double
 func bridgeToObjectiveCUnconditional<T>(x: T) -> AnyObject
-func _adHocPrint<T, TargetStream : OutputStream>(object: T, inout target: TargetStream)
 @transparent func _getBool(v: Int1) -> Bool
+func _adHocPrint<T, TargetStream : OutputStream>(object: T, inout target: TargetStream)
 typealias CUnsignedShort = UInt16
-@transparent func _doesOptionalHaveValue<T>(inout v: T?) -> Int1
 typealias UWord = UInt
+@transparent func _doesOptionalHaveValue<T>(inout v: T?) -> Int1
 struct Int64 : SignedInteger {
   var value: Int64
   @transparent init()
   @transparent init(_ v: Int64)
   @transparent init(_ value: Int64)
+  @transparent init(bigEndian value: Int64)
+  @transparent init(littleEndian value: Int64)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> Int64
   @transparent static func convertFromIntegerLiteral(value: Int64) -> Int64
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = Int64
   func getArrayBoundValue() -> Int64
+  var bigEndian: Int64 {
+    get {}
+  }
+  var littleEndian: Int64 {
+    get {}
+  }
+  var byteSwapped: Int64 {
+    get {}
+  }
   static var max: Int64 {
     @transparent get {}
   }
@@ -2627,15 +2926,14 @@ struct Int64 : SignedInteger {
   }
 }
 @noreturn @transparent func _preconditionFailure(_ message: StaticString = default, file: StaticString = default, line: UWord = default)
-struct CVaListPointer {
-  var value: UnsafePointer<Void>
-  init(fromUnsafePointer from: UnsafePointer<Void>)
-  @conversion func __conversion() -> CMutableVoidPointer
-}
 struct String {
   init()
   init(_ _core: _StringCore)
   var core: _StringCore
+}
+struct CVaListPointer {
+  var value: UnsafePointer<Void>
+  init(fromUnsafePointer from: UnsafePointer<Void>)
 }
 struct _Buffer32 {
   var x0: UInt64
@@ -2645,10 +2943,10 @@ struct _Buffer32 {
   init(x0: UInt64, x1: UInt64, x2: UInt64, x3: UInt64)
   init()
 }
-struct _NilOptionalComparator : Equatable {
-  init()
+protocol _Pointer {
+  var value: RawPointer { get }
+  init(_ value: RawPointer)
 }
-func _demandUniqueMutableBuffer<_Buffer : ArrayBufferType>(inout source: _Buffer, newCount: Int, minimumCapacity: Int = default) -> ContiguousArrayBuffer<_Buffer.Element>?
 @objc @final class ContiguousArrayStorage<T> : _NSSwiftArray {
   typealias Buffer = ContiguousArrayBuffer<T>
   @objc deinit
@@ -2661,6 +2959,9 @@ func _demandUniqueMutableBuffer<_Buffer : ArrayBufferType>(inout source: _Buffer
 }
 @asmname("swift_isClassOrObjCExistential") func _swift_isClassOrObjCExistential<T>(x: T.Type) -> Bool
 typealias Any = protocol<>
+@transparent func _sin(x: Float) -> Float
+@transparent func _sin(x: Double) -> Double
+func _growArrayCapacity(capacity: Int) -> Int
 func _replExit()
 struct _ArrayBody {
   init(count: Int, capacity: Int, elementTypeIsBridgedVerbatim: Bool = default)
@@ -2676,7 +2977,6 @@ struct _ArrayBody {
   var _capacityAndFlags: UInt
 }
 typealias MaxBuiltinIntegerType = Int2048
-@asmname("read") func posix_read(fd: Int32, buf: RawPointer, sz: Int) -> Int
 enum DictionaryIndex<KeyType : Hashable, ValueType> : BidirectionalIndex {
   typealias _NativeIndex = _NativeDictionaryIndex<KeyType, ValueType>
   typealias _CocoaIndex = _CocoaDictionaryIndex
@@ -2692,8 +2992,8 @@ enum DictionaryIndex<KeyType : Hashable, ValueType> : BidirectionalIndex {
     @transparent get {}
   }
   typealias Index = DictionaryIndex<KeyType, ValueType>
-  func pred() -> DictionaryIndex<KeyType, ValueType>
-  func succ() -> DictionaryIndex<KeyType, ValueType>
+  func predecessor() -> DictionaryIndex<KeyType, ValueType>
+  func successor() -> DictionaryIndex<KeyType, ValueType>
 }
 class _DictionaryMirror<Key : Hashable, Value> : Mirror {
   typealias Dict = Dictionary<Key, Value>
@@ -2726,9 +3026,14 @@ class _DictionaryMirror<Key : Hashable, Value> : Mirror {
   }
   @objc deinit
 }
-@transparent func _convertCConstPointerToUnsafePointer<T>(p: CConstPointer<T>) -> UnsafePointer<T>
-@transparent func _convertCMutablePointerToUnsafePointer<T>(p: CMutablePointer<T>) -> UnsafePointer<T>
-struct RangeGenerator<T : ForwardIndex> : Generator, Sequence {
+struct UTF32 : UnicodeCodec {
+  typealias CodeUnit = UInt32
+  init()
+  func decode<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> UTFDecodeResult
+  static func _decode<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> UTFDecodeResult
+  static func encode<S : Sink where CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
+}
+struct RangeGenerator<T : ForwardIndex> : Generator, Sequence, Reflectable {
   typealias Element = T
   @transparent init(_ bounds: Range<T>)
   func next() -> T?
@@ -2736,15 +3041,7 @@ struct RangeGenerator<T : ForwardIndex> : Generator, Sequence {
   func generate() -> RangeGenerator<T>
   var startIndex: T
   var endIndex: T
-}
-struct UTF32 : UnicodeCodec {
-  typealias CodeUnit = UInt32
-  init(_ _value: UInt32)
-  static func create(value: CodeUnit) -> UTF32
-  func value() -> CodeUnit
-  static func decode<G : Generator where CodeUnit == CodeUnit>(inout input: G) -> UnicodeScalar?
-  static func encode<S : Sink where CodeUnit == CodeUnit>(input: UnicodeScalar, inout output: S)
-  var _value
+  func getMirror() -> Mirror
 }
 @assignment @transparent func <<=(inout lhs: UInt8, rhs: UInt8)
 @assignment @transparent func <<=(inout lhs: Int8, rhs: Int8)
@@ -2760,29 +3057,35 @@ func withUnsafePointerToObject<T, Result>(inout arg: T?, body: (UnsafePointer<Im
 @transparent func _fastPath<C : LogicValue>(x: C) -> Bool
 typealias CSignedChar = Int8
 typealias CUnsignedChar = UInt8
+@transparent func _exp2(x: Float) -> Float
+@transparent func _exp2(x: Double) -> Double
 @objc @class_protocol protocol AnyObject {
 }
 protocol Printable {
   var description: String { get }
 }
+func _dictionaryBridgeFromObjectiveCConditional<Key, Value, BridgesToKey, BridgesToValue>(source: Dictionary<Key, Value>) -> Dictionary<BridgesToKey, BridgesToValue>?
+@transparent func _sqrt(x: Float) -> Float
+@transparent func _sqrt(x: Double) -> Double
+@transparent func _precondition(condition: @auto_closure () -> Bool, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
+@transparent func _precondition<T : LogicValue>(condition: @auto_closure () -> T, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 protocol ForwardIndex : _ForwardIndex {
   func ~>(start: Self, _: (_Distance, Self)) -> Self.DistanceType
   func ~>(start: Self, _: (_Advance, Self.DistanceType)) -> Self
   func ~>(start: Self, _: (_Advance, (Self.DistanceType, Self))) -> Self
 }
-@transparent func _precondition(condition: @auto_closure () -> Bool, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
-@transparent func _precondition<T : LogicValue>(condition: @auto_closure () -> T, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
+protocol _RawOptionSet : RawRepresentable {
+  typealias RawType : BitwiseOperations, Equatable
+}
 struct SequenceOf<T> : Sequence {
   init<G : Generator where T == T>(_ generate: () -> G)
   init<S : Sequence where T == T>(_ self_: S)
   func generate() -> GeneratorOf<T>
   let _generate: () -> GeneratorOf<T>
 }
-protocol _RawOptionSet : RawRepresentable {
-  typealias RawType : BitwiseOperations, Equatable
-}
 @transparent func assert(condition: @auto_closure () -> Bool, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
 @transparent func assert<T : LogicValue>(condition: @auto_closure () -> T, _ message: StaticString = default, file: StaticString = default, line: UWord = default)
+func _dictionaryDownCast<BaseKey, BaseValue, DerivedKey, DerivedValue>(source: Dictionary<BaseKey, BaseValue>) -> Dictionary<DerivedKey, DerivedValue>
 func reduce<S : Sequence, U>(sequence: S, initial: U, combine: (U, S.GeneratorType.Element) -> U) -> U
 func reverse<C : Collection where C.IndexType : BidirectionalIndex>(source: C) -> ReverseView<C>
 let emptyNSSwiftArray: _NSSwiftArray
@@ -2802,7 +3105,7 @@ protocol StringLiteralConvertible : ExtendedGraphemeClusterLiteralConvertible {
 }
 @transparent func _getOptionalValue<T>(v: T?) -> T
 func insertionSort<C : MutableCollection where C.IndexType : BidirectionalIndex>(inout elements: C, range: Range<C.IndexType>, inout less: (C.GeneratorType.Element, C.GeneratorType.Element) -> Bool)
-func insertionSort<C : MutableCollection where C.IndexType : BidirectionalIndex, C.GeneratorType.Element : Comparable>(inout elements: C, range: Range<C.IndexType>)
+func insertionSort<C : MutableCollection where C.IndexType : RandomAccessIndex, C.GeneratorType.Element : Comparable>(inout elements: C, range: Range<C.IndexType>)
 func _asUTF16CodeUnit(us: UnicodeScalar) -> CodeUnit
 struct Zip2<S0 : Sequence, S1 : Sequence> : Sequence {
   typealias Stream1 = S0.GeneratorType
@@ -2813,18 +3116,18 @@ struct Zip2<S0 : Sequence, S1 : Sequence> : Sequence {
   var sequences: (S0, S1)
 }
 func countElements<T : _Collection>(x: T) -> T.IndexType.DistanceType
-@asmname("memcpy") func c_memcpy(#dest: UnsafePointer<Void>, #src: UnsafePointer<Void>, #size: UInt)
 func _arrayUpCast<Derived, Base>(a: Array<Derived>) -> Array<Base>
-struct ReverseRangeGenerator<T : BidirectionalIndex> : Generator, Sequence {
+struct ReverseRangeGenerator<T : BidirectionalIndex> : Generator, Sequence, Reflectable {
   typealias Element = T
   @transparent init(start: T, pastEnd: T)
   func next() -> T?
   typealias GeneratorType = ReverseRangeGenerator<T>
   func generate() -> ReverseRangeGenerator<T>
   var _bounds: (T, T)
+  func getMirror() -> Mirror
 }
 @objc protocol _SwiftNSDictionaryRequiredOverrides : _SwiftNSCopying, _SwiftNSFastEnumeration {
-  @objc init(objects: CConstPointer<AnyObject?>, forKeys: CConstVoidPointer, count: Int)
+  @objc init(objects: _DictionaryObjectsPointer, forKeys: _DictionaryKeysPointer, count: Int)
   @objc var count: Int { get }
   @objc func objectForKey(aKey: AnyObject?) -> AnyObject?
   @objc func keyEnumerator() -> _SwiftNSEnumerator?
@@ -2835,33 +3138,6 @@ typealias CFloat = Float
 protocol StringInterpolationConvertible {
   class func convertFromStringInterpolation(strings: Self...) -> Self
   class func convertFromStringInterpolationSegment<T>(expr: T) -> Self
-}
-struct _NilMirror : Mirror {
-  var value: Any {
-    get {}
-  }
-  var valueType: Any.Type {
-    get {}
-  }
-  var objectIdentifier: ObjectIdentifier? {
-    get {}
-  }
-  var count: Int {
-    get {}
-  }
-  subscript (i: Int) -> (String, Mirror) {
-    get {}
-  }
-  var summary: String {
-    get {}
-  }
-  var quickLookObject: QuickLookObject? {
-    get {}
-  }
-  var disposition: MirrorDisposition {
-    get {}
-  }
-  init()
 }
 func _asUnicodeCodePoint(us: UnicodeScalar) -> Int32
 func _asUnicodeCodePoint(us: UnicodeScalar) -> UInt32
@@ -2884,6 +3160,7 @@ struct Repeat<T> : Collection {
 protocol _SignedNumber : Comparable, IntegerLiteralConvertible {
   func -(lhs: Self, rhs: Self) -> Self
 }
+func _dictionaryBridgeToObjectiveC<BridgesToKey, BridgesToValue, Key, Value>(source: Dictionary<BridgesToKey, BridgesToValue>) -> Dictionary<Key, Value>
 @objc @final class _NativeDictionaryStorageImpl<KeyType : Hashable, ValueType> : HeapBufferStorageBase {
   typealias Element = _DictionaryElement<KeyType, ValueType>
   typealias DictionaryHeapBuffer = HeapBuffer<_DictionaryBody, _DictionaryElement<KeyType, ValueType>?>
@@ -2891,16 +3168,18 @@ protocol _SignedNumber : Comparable, IntegerLiteralConvertible {
   @final @final @final @final func __getInstanceSizeAndAlignMask() -> (Int, Int)
   init()
 }
-var _cocoaStringEncodeSomeUTF8: (target: _StringCore, position: Int) -> (Int, UTF8Chunk)
 @transparent func _isReleaseAssertConfiguration() -> Bool
 @objc protocol _SwiftNSCopying {
   @objc func copyWithZone(zone: _SwiftNSZone) -> AnyObject
 }
+@transparent func _round(x: Float) -> Float
+@transparent func _round(x: Double) -> Double
 protocol _SignedInteger : _Integer, SignedNumber {
   func toIntMax() -> IntMax
   class func from(_: IntMax) -> Self
 }
 func isUniquelyReferenced<T>(inout x: T) -> Bool
+typealias _FastEnumerationItemsPtr = AutoreleasingUnsafePointer<AnyObject?>
 func _int64ToString(value: Int64, radix: Int64 = default, uppercase: Bool = default) -> String
 protocol BidirectionalIndex : ForwardIndex, _BidirectionalIndex {
 }
@@ -2955,13 +3234,13 @@ struct _StructMirror : Mirror {
   init(data: _MagicMirrorData)
 }
 @transparent func reinterpretCast<T, U>(x: T) -> U
-@transparent func _branchHint<C : LogicValue>(actual: C, expected: Bool) -> Bool
 @transparent func alignof<T>(_: T.Type) -> Int
-@asmname("swift_MagicMirrorData_summary") func swift_MagicMirrorData_summaryImpl(metadata: Any.Type, result: UnsafePointer<String>)
+@transparent func _branchHint<C : LogicValue>(actual: C, expected: Bool) -> Bool
 protocol StringElement {
   class func toUTF16CodeUnit(_: Self) -> CodeUnit
   class func fromUTF16CodeUnit(utf16: CodeUnit) -> Self
 }
+@asmname("swift_MagicMirrorData_summary") func swift_MagicMirrorData_summaryImpl(metadata: Any.Type, result: UnsafePointer<String>)
 struct _Buffer72 {
   var x0: UInt64
   var x1: UInt64
@@ -2976,12 +3255,13 @@ struct _Buffer72 {
   init()
 }
 typealias _SwiftNSZone = COpaquePointer
+protocol _ConditionallyBridgedToObjectiveC : _BridgedToObjectiveC {
+  class func isBridgedToObjectiveC() -> Bool
+  class func bridgeFromObjectiveCConditional(source: Self.ObjectiveCType) -> Self?
+}
 protocol _RandomAccessIndex : _BidirectionalIndex {
   func distanceTo(_: Self) -> Self.DistanceType
   func advancedBy(_: Self.DistanceType) -> Self
-}
-protocol _ConditionallyBridgedToObjectiveC : _BridgedToObjectiveC {
-  class func isBridgedToObjectiveC() -> Bool
 }
 protocol _UnsignedInteger : _Integer {
   func toUIntMax() -> UIntMax
@@ -3027,7 +3307,7 @@ struct _CocoaFastEnumerationStackBuf {
   @objc deinit
   @objc init()
 }
-struct Range<T : ForwardIndex> : LogicValue, Sliceable {
+struct Range<T : ForwardIndex> : LogicValue, Sliceable, Reflectable {
   @transparent init(start: T, end: T)
   var isEmpty: Bool {
     get {}
@@ -3052,8 +3332,10 @@ struct Range<T : ForwardIndex> : LogicValue, Sliceable {
   }
   var _startIndex: T
   var _endIndex: T
+  func getMirror() -> Mirror
 }
-@transparent func _convertCMutableVoidPointerToCOpaquePointer(p: CMutableVoidPointer) -> COpaquePointer
+func _arrayNonSliceInPlaceReplace<B : ArrayBufferType, C : Collection where B.Element == B.Element, Int == Int>(inout target: B, subRange: Range<Int>, insertCount: Int, newValues: C)
+func _arrayDownCastConditional<Base, Derived>(a: Array<Base>) -> [Derived]?
 protocol _PrintableNSObject {
   var description: String! { get }
   var debugDescription: String! { get }
@@ -3068,7 +3350,7 @@ struct MapSequenceGenerator<Base : Generator, T> : Generator, Sequence {
   var _transform: (Base.Element) -> T
   init(_base: Base, _transform: (Base.Element) -> T)
 }
-@class_protocol @objc protocol _CocoaArray {
+@unsafe_no_objc_tagged_pointer @class_protocol @objc protocol _CocoaArray {
   @objc func objectAtIndex(index: Int) -> AnyObject
   @objc func getObjects(_: UnsafePointer<AnyObject>, range: _SwiftNSRange)
   @objc func countByEnumeratingWithState(state: UnsafePointer<_SwiftNSFastEnumerationState>, objects buffer: UnsafePointer<AnyObject>, count len: Int) -> Int
@@ -3080,12 +3362,37 @@ struct _DictionaryMirrorPosition<Key : Hashable, Value> {
   var _intPos: Int
   var _dicPos: DictionaryIndex<Key, Value>
   init(_ d: Dictionary<Key, Value>)
-  func succ()
+  func successor()
   func prec()
+}
+struct UnsafeArrayGenerator<T> : Generator, Sequence {
+  func next() -> T?
+  func generate() -> UnsafeArrayGenerator<T>
+  var position: UnsafePointer<T>
+  var end: UnsafePointer<T>
+  init(position: UnsafePointer<T>, end: UnsafePointer<T>)
+}
+struct UnsafeMutableArray<T> : MutableCollection {
+  var startIndex: Int {
+    get {}
+  }
+  var endIndex: Int {
+    get {}
+  }
+  subscript (i: Int) -> T {
+    get {}
+    set {}
+  }
+  init(start: UnsafePointer<T>, length: Int)
+  func generate() -> UnsafeArrayGenerator<T>
+  var _position: UnsafePointer<T>
+  var _end: UnsafePointer<T>
 }
 protocol AbsoluteValuable : SignedNumber {
   class func abs(_: Self) -> Self
 }
+@transparent func _nearbyint(x: Float) -> Float
+@transparent func _nearbyint(x: Double) -> Double
 protocol MutableSliceable : Sliceable, MutableCollection {
   subscript (_: Range<Self.IndexType>) -> Self.SliceType { get set }
 }
@@ -3094,6 +3401,15 @@ protocol MutableSliceable : Sliceable, MutableCollection {
   @objc func nextObject() -> AnyObject?
 }
 @transparent func sizeof<T>(_: T.Type) -> Int
+struct PermutationGenerator<C : Collection, Indices : Sequence where C.IndexType == C.IndexType> : Generator, Sequence {
+  var seq: C
+  var indices: Indices.GeneratorType
+  typealias Element = C.GeneratorType.Element
+  func next() -> Element?
+  typealias GeneratorType = PermutationGenerator<C, Indices>
+  func generate() -> PermutationGenerator<C, Indices>
+  init(elements seq: C, indices: Indices)
+}
 struct StaticString : _BuiltinExtendedGraphemeClusterLiteralConvertible, ExtendedGraphemeClusterLiteralConvertible, _BuiltinStringLiteralConvertible, StringLiteralConvertible {
   var start: RawPointer
   var byteSize: Word
@@ -3105,23 +3421,15 @@ struct StaticString : _BuiltinExtendedGraphemeClusterLiteralConvertible, Extende
   static func _convertFromBuiltinStringLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> StaticString
   static func convertFromStringLiteral(value: StaticString) -> StaticString
 }
-struct PermutationGenerator<C : Collection, Indices : Sequence where C.IndexType == C.IndexType> : Generator, Sequence {
-  var seq: C
-  var indices: Indices.GeneratorType
-  typealias Element = C.GeneratorType.Element
-  func next() -> Element?
-  typealias GeneratorType = PermutationGenerator<C, Indices>
-  func generate() -> PermutationGenerator<C, Indices>
-  init(elements seq: C, indices: Indices)
-}
-func _formatNumChildren(count: Int) -> String
 func find<C : Collection where C.GeneratorType.Element : Equatable>(domain: C, value: C.GeneratorType.Element) -> C.IndexType?
+func _formatNumChildren(count: Int) -> String
 struct _Stdout : OutputStream {
   func write(string: String)
   init()
 }
-func transcode<Input : Generator, Output : Sink, InputEncoding : UnicodeCodec, OutputEncoding : UnicodeCodec where InputEncoding.CodeUnit == InputEncoding.CodeUnit, OutputEncoding.CodeUnit == OutputEncoding.CodeUnit>(inputEncoding: InputEncoding.Type, outputEncoding: OutputEncoding.Type, input: Input, output: Output)
-func transcode<Input : Generator, Output : Sink, Encoding : UnicodeCodec where Encoding.CodeUnit == Encoding.CodeUnit, Encoding.CodeUnit == Encoding.CodeUnit>(inputEncoding: Encoding.Type, outputEncoding: Encoding.Type, input: Input, output: Output)
+func transcode<Input : Generator, Output : Sink, InputEncoding : UnicodeCodec, OutputEncoding : UnicodeCodec where InputEncoding.CodeUnit == InputEncoding.CodeUnit, OutputEncoding.CodeUnit == OutputEncoding.CodeUnit>(inputEncoding: InputEncoding.Type, outputEncoding: OutputEncoding.Type, input: Input, output: Output, #stopOnError: Bool) -> (hadError: Bool)
+@transparent func _cos(x: Float) -> Float
+@transparent func _cos(x: Double) -> Double
 protocol ExtendedGraphemeClusterLiteralConvertible {
   typealias ExtendedGraphemeClusterLiteralType : _BuiltinExtendedGraphemeClusterLiteralConvertible
   class func convertFromExtendedGraphemeClusterLiteral(value: ExtendedGraphemeClusterLiteralType) -> Self
@@ -3131,11 +3439,22 @@ struct UInt16 : UnsignedInteger {
   @transparent init()
   @transparent init(_ v: Int16)
   @transparent init(_ value: UInt16)
+  @transparent init(bigEndian value: UInt16)
+  @transparent init(littleEndian value: UInt16)
   @transparent static func _convertFromBuiltinIntegerLiteral(value: Int2048) -> UInt16
   @transparent static func convertFromIntegerLiteral(value: UInt16) -> UInt16
   @transparent func _getBuiltinArrayBoundValue() -> Word
   typealias ArrayBoundType = UInt16
   func getArrayBoundValue() -> UInt16
+  var bigEndian: UInt16 {
+    get {}
+  }
+  var littleEndian: UInt16 {
+    get {}
+  }
+  var byteSwapped: UInt16 {
+    get {}
+  }
   static var max: UInt16 {
     @transparent get {}
   }
@@ -3143,10 +3462,7 @@ struct UInt16 : UnsignedInteger {
     @transparent get {}
   }
 }
-func _arrayReplace1<T, C : Collection where T == T>(inout target: ContiguousArray<T>, subRange: Range<Int>, newValues: C)
-func _arrayReplace1<T, C : Collection where T == T>(inout target: Slice<T>, subRange: Range<Int>, newValues: C)
-func _arrayReplace1<T, C : Collection where T == T>(inout target: Array<T>, subRange: Range<Int>, newValues: C)
-func _arrayReplace2<A : ArrayType, C : Collection where C.GeneratorType.Element == C.GeneratorType.Element, Int == Int>(inout target: A, subRange: Range<Int>, newValues: C)
+func _dictionaryDownCastConditional<BaseKey, BaseValue, DerivedKey, DerivedValue>(source: Dictionary<BaseKey, BaseValue>) -> Dictionary<DerivedKey, DerivedValue>?
 struct Bool {
   var value: Int1
   @transparent init()
@@ -3157,21 +3473,6 @@ struct Bool {
   static var true: Bool {
     @transparent get {}
   }
-}
-struct CMutablePointer<T> : Equatable, LogicValue {
-  let owner: AnyObject?
-  let value: RawPointer
-  @transparent static func __inout_conversion(inout scalar: T) -> CMutablePointer<T>
-  @transparent static func __inout_conversion(inout a: Array<T>) -> CMutablePointer<T>
-  var scoped: Bool {
-    @transparent get {}
-  }
-  @transparent func withUnsafePointer<U>(f: UnsafePointer<T> -> U) -> U
-  @transparent func getLogicValue() -> Bool
-  @transparent func _withBridgeObject<U, R>(inout buffer: U?, body: (AutoreleasingUnsafePointer<U?>) -> R) -> R
-  @transparent func _withBridgeValue<U, R>(inout buffer: U, body: (CMutablePointer<U>) -> R) -> R
-  func _setIfNonNil(body: () -> T)
-  init(owner: AnyObject?, value: RawPointer)
 }
 @transparent func _fixLifetime<T>(x: T)
 protocol RawRepresentable {
@@ -3214,25 +3515,6 @@ func <=<T : _Comparable>(lhs: T, rhs: T) -> Bool
 @assignment @transparent func >>=(inout lhs: UInt, rhs: UInt)
 @assignment @transparent func >>=(inout lhs: Int, rhs: Int)
 @noreturn @transparent func _debugPreconditionFailure(_ message: StaticString = default, file: StaticString = default, line: UWord = default)
-extension _Nil {
-  @conversion @transparent func __conversion<T>() -> CMutablePointer<T>
-  @conversion @transparent func __conversion() -> CMutableVoidPointer
-  @conversion @transparent func __conversion<T>() -> CConstPointer<T>
-  @conversion @transparent func __conversion() -> CConstVoidPointer
-  @conversion @transparent func __conversion<T>() -> AutoreleasingUnsafePointer<T>
-}
-extension _Nil {
-  @conversion func __conversion() -> COpaquePointer
-}
-extension _Nil {
-  @conversion func __conversion<T>() -> T!
-}
-extension _Nil {
-  @conversion func __conversion() -> _NilOptionalComparator?
-}
-extension _Nil {
-  @conversion @transparent func __conversion<T>() -> UnsafePointer<T>
-}
 extension Int8 : Hashable {
   var hashValue: Int {
     get {}
@@ -3244,15 +3526,15 @@ extension Int8 : Printable {
   }
 }
 extension Int8 : RandomAccessIndex {
-  @transparent func succ() -> Int8
-  @transparent func pred() -> Int8
+  @transparent func successor() -> Int8
+  @transparent func predecessor() -> Int8
   @transparent func distanceTo(other: Int8) -> Int
   @transparent func advancedBy(amount: Int) -> Int8
-  @transparent static func uncheckedAdd(lhs: Int8, _ rhs: Int8) -> (Int8, Bool)
-  @transparent static func uncheckedSubtract(lhs: Int8, _ rhs: Int8) -> (Int8, Bool)
-  @transparent static func uncheckedMultiply(lhs: Int8, _ rhs: Int8) -> (Int8, Bool)
-  @transparent static func uncheckedDivide(lhs: Int8, _ rhs: Int8) -> (Int8, Bool)
-  @transparent static func uncheckedModulus(lhs: Int8, _ rhs: Int8) -> (Int8, Bool)
+  @transparent static func addWithOverflow(lhs: Int8, _ rhs: Int8) -> (Int8, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: Int8, _ rhs: Int8) -> (Int8, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: Int8, _ rhs: Int8) -> (Int8, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: Int8, _ rhs: Int8) -> (Int8, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: Int8, _ rhs: Int8) -> (Int8, overflow: Bool)
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: IntMax) -> Int8
 }
@@ -3284,7 +3566,7 @@ extension Int8 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Int8 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension UnsafePointer<T> : Printable {
   var description: String {
@@ -3313,15 +3595,15 @@ extension UInt64 : Printable {
   }
 }
 extension UInt64 : RandomAccessIndex {
-  @transparent func succ() -> UInt64
-  @transparent func pred() -> UInt64
+  @transparent func successor() -> UInt64
+  @transparent func predecessor() -> UInt64
   @transparent func distanceTo(other: UInt64) -> Int
   @transparent func advancedBy(amount: Int) -> UInt64
-  @transparent static func uncheckedAdd(lhs: UInt64, _ rhs: UInt64) -> (UInt64, Bool)
-  @transparent static func uncheckedSubtract(lhs: UInt64, _ rhs: UInt64) -> (UInt64, Bool)
-  @transparent static func uncheckedMultiply(lhs: UInt64, _ rhs: UInt64) -> (UInt64, Bool)
-  @transparent static func uncheckedDivide(lhs: UInt64, _ rhs: UInt64) -> (UInt64, Bool)
-  @transparent static func uncheckedModulus(lhs: UInt64, _ rhs: UInt64) -> (UInt64, Bool)
+  @transparent static func addWithOverflow(lhs: UInt64, _ rhs: UInt64) -> (UInt64, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: UInt64, _ rhs: UInt64) -> (UInt64, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: UInt64, _ rhs: UInt64) -> (UInt64, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: UInt64, _ rhs: UInt64) -> (UInt64, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: UInt64, _ rhs: UInt64) -> (UInt64, overflow: Bool)
   @transparent func toUIntMax() -> UIntMax
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: UIntMax) -> UInt64
@@ -3355,7 +3637,10 @@ extension UInt64 {
   init(_ v: UnicodeScalar)
 }
 extension UInt64 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
+}
+extension Character : Reflectable {
+  func getMirror() -> Mirror
 }
 extension Character : Streamable {
   func writeTo<Target : OutputStream>(inout target: Target)
@@ -3388,8 +3673,6 @@ extension ContiguousArray<T> : ArrayType {
   var _elementStorage: UnsafePointer<T> {
     get {}
   }
-  func copy() -> ContiguousArray<T>
-  func unshare()
   func reserveCapacity(minimumCapacity: Int)
   func append(newElement: T)
   func extend<S : Sequence where T == T>(sequence: S)
@@ -3400,6 +3683,7 @@ extension ContiguousArray<T> : ArrayType {
   func join<S : Sequence where ContiguousArray<T> == ContiguousArray<T>>(elements: S) -> ContiguousArray<T>
   func reduce<U>(initial: U, combine: (U, T) -> U) -> U
   func sort(isOrderedBefore: (T, T) -> Bool)
+  func sorted(isOrderedBefore: (T, T) -> Bool) -> ContiguousArray<T>
   func map<U>(transform: (T) -> U) -> ContiguousArray<U>
   func reverse() -> ContiguousArray<T>
   func filter(includeElement: (T) -> Bool) -> ContiguousArray<T>
@@ -3418,11 +3702,12 @@ extension ContiguousArray<T> : Printable, DebugPrintable {
 }
 extension ContiguousArray<T> {
   @transparent func _cPointerArgs() -> (AnyObject?, RawPointer)
-  @conversion @transparent func __conversion() -> CConstPointer<T>
-  @conversion @transparent func __conversion() -> CConstVoidPointer
 }
 extension ContiguousArray<T> {
   func withUnsafePointerToElements<R>(body: (UnsafePointer<T>) -> R) -> R
+}
+extension ContiguousArray<T> {
+  func withUnsafeMutableStorage<R>(body: (inout UnsafeMutableArray<T>) -> R) -> R
 }
 extension ContiguousArray<T> {
   func replaceRange<C : Collection where T == T>(subRange: Range<Int>, with newValues: C)
@@ -3455,8 +3740,6 @@ extension Slice<T> : ArrayType {
   var _elementStorage: UnsafePointer<T> {
     get {}
   }
-  func copy() -> Slice<T>
-  func unshare()
   func reserveCapacity(minimumCapacity: Int)
   func append(newElement: T)
   func extend<S : Sequence where T == T>(sequence: S)
@@ -3467,6 +3750,7 @@ extension Slice<T> : ArrayType {
   func join<S : Sequence where Slice<T> == Slice<T>>(elements: S) -> Slice<T>
   func reduce<U>(initial: U, combine: (U, T) -> U) -> U
   func sort(isOrderedBefore: (T, T) -> Bool)
+  func sorted(isOrderedBefore: (T, T) -> Bool) -> Slice<T>
   func map<U>(transform: (T) -> U) -> Slice<U>
   func reverse() -> Slice<T>
   func filter(includeElement: (T) -> Bool) -> Slice<T>
@@ -3485,11 +3769,12 @@ extension Slice<T> : Printable, DebugPrintable {
 }
 extension Slice<T> {
   @transparent func _cPointerArgs() -> (AnyObject?, RawPointer)
-  @conversion @transparent func __conversion() -> CConstPointer<T>
-  @conversion @transparent func __conversion() -> CConstVoidPointer
 }
 extension Slice<T> {
   func withUnsafePointerToElements<R>(body: (UnsafePointer<T>) -> R) -> R
+}
+extension Slice<T> {
+  func withUnsafeMutableStorage<R>(body: (inout UnsafeMutableArray<T>) -> R) -> R
 }
 extension Slice<T> {
   func replaceRange<C : Collection where T == T>(subRange: Range<Int>, with newValues: C)
@@ -3505,15 +3790,15 @@ extension Int64 : Printable {
   }
 }
 extension Int64 : RandomAccessIndex {
-  @transparent func succ() -> Int64
-  @transparent func pred() -> Int64
+  @transparent func successor() -> Int64
+  @transparent func predecessor() -> Int64
   @transparent func distanceTo(other: Int64) -> Int
   @transparent func advancedBy(amount: Int) -> Int64
-  @transparent static func uncheckedAdd(lhs: Int64, _ rhs: Int64) -> (Int64, Bool)
-  @transparent static func uncheckedSubtract(lhs: Int64, _ rhs: Int64) -> (Int64, Bool)
-  @transparent static func uncheckedMultiply(lhs: Int64, _ rhs: Int64) -> (Int64, Bool)
-  @transparent static func uncheckedDivide(lhs: Int64, _ rhs: Int64) -> (Int64, Bool)
-  @transparent static func uncheckedModulus(lhs: Int64, _ rhs: Int64) -> (Int64, Bool)
+  @transparent static func addWithOverflow(lhs: Int64, _ rhs: Int64) -> (Int64, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: Int64, _ rhs: Int64) -> (Int64, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: Int64, _ rhs: Int64) -> (Int64, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: Int64, _ rhs: Int64) -> (Int64, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: Int64, _ rhs: Int64) -> (Int64, overflow: Bool)
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: IntMax) -> Int64
 }
@@ -3545,7 +3830,7 @@ extension Int64 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Int64 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Float : Printable {
   var description: String {
@@ -3635,8 +3920,8 @@ extension Float {
   @transparent init(_ v: Float80)
 }
 extension Float : RandomAccessIndex {
-  @transparent func succ() -> Float
-  @transparent func pred() -> Float
+  @transparent func successor() -> Float
+  @transparent func predecessor() -> Float
   @transparent func distanceTo(other: Float) -> Int
   @transparent func advancedBy(amount: Int) -> Float
 }
@@ -3644,7 +3929,7 @@ extension Float32 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Float : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Dictionary<KeyType, ValueType> : Printable, DebugPrintable {
   func _makeDescription(#isDebug: Bool) -> String
@@ -3659,8 +3944,8 @@ extension Dictionary<KeyType, ValueType> : Reflectable {
   func getMirror() -> Mirror
 }
 extension String {
-  static func fromCString(cs: CString) -> String
-  static func fromCString(up: UnsafePointer<CChar>) -> String
+  static func fromCString(cs: CString) -> String?
+  static func fromCStringRepairingIllFormedUTF8(cs: CString) -> (String?, hadError: Bool)
 }
 extension String {
   init(_ c: Character)
@@ -3681,6 +3966,11 @@ extension String : OutputStream {
 }
 extension String : Streamable {
   func writeTo<Target : OutputStream>(inout target: Target)
+}
+extension String {
+  static func _fromWellFormedCodeUnitSequence<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(encoding: Encoding.Type, input: Input) -> String
+  static func _fromCodeUnitSequence<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(encoding: Encoding.Type, input: Input) -> String?
+  static func _fromCodeUnitSequenceWithRepair<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(encoding: Encoding.Type, input: Input) -> (String, hadError: Bool)
 }
 extension String : _BuiltinExtendedGraphemeClusterLiteralConvertible {
   static func _convertFromBuiltinExtendedGraphemeClusterLiteral(start: RawPointer, byteSize: Word, isASCII: Int1) -> String
@@ -3733,8 +4023,8 @@ extension String {
 extension String : Collection {
   struct Index : BidirectionalIndex {
     init(_ _base: String.UnicodeScalarView.IndexType)
-    func succ() -> String.Index
-    func pred() -> String.Index
+    func successor() -> String.Index
+    func predecessor() -> String.Index
     let _base: String.UnicodeScalarView.IndexType
     var _utf16Index: Int {
       get {}
@@ -3760,13 +4050,12 @@ extension String {
   func join<S : Sequence where String == String>(elements: S) -> String
 }
 extension String {
-  init<Encoding : UnicodeCodec, Input : Collection where Encoding.CodeUnit == Encoding.CodeUnit>(_ _encoding: Encoding.Type, input: Input)
   init(count sz: Int, repeatedValue c: Character)
   init(count: Int, repeatedValue c: UnicodeScalar)
-  var _lines: String[] {
+  var _lines: [String] {
     get {}
   }
-  func _split(separator: UnicodeScalar) -> String[]
+  func _split(separator: UnicodeScalar) -> [String]
   var isEmpty: Bool {
     get {}
   }
@@ -3810,8 +4099,8 @@ extension String {
 extension String {
   func _substr(start: Int) -> String
   func _splitFirst(delim: UnicodeScalar) -> (before: String, after: String, wasFound: Bool)
-  func _splitFirstIf(pred: (UnicodeScalar) -> Bool) -> (before: String, found: UnicodeScalar, after: String, wasFound: Bool)
-  func _splitIf(pred: (UnicodeScalar) -> Bool) -> String[]
+  func _splitFirstIf(predicate: (UnicodeScalar) -> Bool) -> (before: String, found: UnicodeScalar, after: String, wasFound: Bool)
+  func _splitIf(predicate: (UnicodeScalar) -> Bool) -> [String]
 }
 extension String {
   struct UTF16View : Sliceable {
@@ -3821,16 +4110,20 @@ extension String {
     var endIndex: Int {
       get {}
     }
-    typealias _GeneratorType = IndexingGenerator<_StringCore>
+    func _toInternalIndex(i: Int) -> Int
+    typealias _GeneratorType = GeneratorOf<UInt16>
     typealias GeneratorType = _GeneratorType
     func generate() -> GeneratorType
-    subscript (i: Int) -> CodeUnit {
+    subscript (i: Int) -> UInt16 {
       get {}
     }
     subscript (subRange: Range<Int>) -> String.UTF16View {
       get {}
     }
     init(_ _core: _StringCore)
+    init(_ _core: _StringCore, offset: Int, length: Int)
+    var _offset: Int
+    var _length: Int
     let _core: _StringCore
   }
   var utf16: String.UTF16View {
@@ -3843,7 +4136,7 @@ extension String {
     init(_ _core: _StringCore)
     struct Index : ForwardIndex {
       init(_ _core: _StringCore, _ _coreIndex: Int, _ _buffer: UTF8Chunk)
-      func succ() -> String.UTF8View.Index
+      func successor() -> String.UTF8View.Index
       let _core: _StringCore
       let _coreIndex: Int
       let _buffer: UTF8Chunk
@@ -3872,7 +4165,7 @@ extension String {
 extension String {
   struct UnicodeScalarView : Sliceable, Sequence {
     init(_ _base: _StringCore)
-    struct ScratchGenerator : Generator {
+    struct _ScratchGenerator : Generator {
       var base: _StringCore
       var idx: Int
       init(_ core: _StringCore, _ pos: Int)
@@ -3880,8 +4173,8 @@ extension String {
     }
     struct IndexType : BidirectionalIndex {
       init(_ _position: Int, _ _base: _StringCore)
-      func succ() -> String.UnicodeScalarView.IndexType
-      func pred() -> String.UnicodeScalarView.IndexType
+      func successor() -> String.UnicodeScalarView.IndexType
+      func predecessor() -> String.UnicodeScalarView.IndexType
       var _position: Int
       var _base: _StringCore
     }
@@ -3894,19 +4187,19 @@ extension String {
     subscript (i: String.UnicodeScalarView.IndexType) -> UnicodeScalar {
       get {}
     }
-    func __slice__(start: String.UnicodeScalarView.IndexType, end: String.UnicodeScalarView.IndexType) -> String.UnicodeScalarView
     subscript (r: Range<String.UnicodeScalarView.IndexType>) -> String.UnicodeScalarView {
       get {}
     }
     struct GeneratorType : Generator {
       init(_ _base: IndexingGenerator<_StringCore>)
       func next() -> UnicodeScalar?
+      var _decoder: UTF16
       var _base: IndexingGenerator<_StringCore>
     }
     func generate() -> String.UnicodeScalarView.GeneratorType
     @conversion func __conversion() -> String
     func compare(other: String.UnicodeScalarView) -> Int
-    func _compareUnicode(other: String.UnicodeScalarView) -> Int
+    @noinline func _compareUnicode(other: String.UnicodeScalarView) -> Int
     var _base: _StringCore
   }
 }
@@ -3927,15 +4220,15 @@ extension UInt8 : Printable {
   }
 }
 extension UInt8 : RandomAccessIndex {
-  @transparent func succ() -> UInt8
-  @transparent func pred() -> UInt8
+  @transparent func successor() -> UInt8
+  @transparent func predecessor() -> UInt8
   @transparent func distanceTo(other: UInt8) -> Int
   @transparent func advancedBy(amount: Int) -> UInt8
-  @transparent static func uncheckedAdd(lhs: UInt8, _ rhs: UInt8) -> (UInt8, Bool)
-  @transparent static func uncheckedSubtract(lhs: UInt8, _ rhs: UInt8) -> (UInt8, Bool)
-  @transparent static func uncheckedMultiply(lhs: UInt8, _ rhs: UInt8) -> (UInt8, Bool)
-  @transparent static func uncheckedDivide(lhs: UInt8, _ rhs: UInt8) -> (UInt8, Bool)
-  @transparent static func uncheckedModulus(lhs: UInt8, _ rhs: UInt8) -> (UInt8, Bool)
+  @transparent static func addWithOverflow(lhs: UInt8, _ rhs: UInt8) -> (UInt8, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: UInt8, _ rhs: UInt8) -> (UInt8, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: UInt8, _ rhs: UInt8) -> (UInt8, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: UInt8, _ rhs: UInt8) -> (UInt8, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: UInt8, _ rhs: UInt8) -> (UInt8, overflow: Bool)
   @transparent func toUIntMax() -> UIntMax
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: UIntMax) -> UInt8
@@ -3973,7 +4266,7 @@ extension UInt8 {
   init(_ v: UnicodeScalar)
 }
 extension UInt8 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension ArrayBuffer<T> {
   init(_ source: ContiguousArrayBuffer<T>)
@@ -3982,8 +4275,10 @@ extension ArrayBuffer<T> {
   var _hasMutableBuffer: Bool {
     get {}
   }
-  func requestUniqueMutableBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func requestUniqueMutableBackingBuffer(minimumCapacity: Int) -> ContiguousArrayBuffer<T>?
+  func isMutableAndUniquelyReferenced() -> Bool
   func requestNativeBuffer() -> ContiguousArrayBuffer<T>?
+  func replace<C : Collection where T == T>(#subRange: Range<Int>, with newCount: Int, elementsOf newValues: C)
   func _typeCheck(subRange: Range<Int>)
   func _uninitializedCopy(subRange: Range<Int>, target: UnsafePointer<T>) -> UnsafePointer<T>
   subscript (subRange: Range<Int>) -> SliceBuffer<T> {
@@ -4046,8 +4341,11 @@ extension CString : Streamable {
 extension UnicodeScalar : Streamable {
   func writeTo<Target : OutputStream>(inout target: Target)
 }
-extension UnicodeScalar : Printable {
+extension UnicodeScalar : Printable, DebugPrintable {
   var description: String {
+    get {}
+  }
+  var debugDescription: String {
     get {}
   }
 }
@@ -4063,6 +4361,23 @@ extension UnicodeScalar : Comparable {
 }
 extension UnicodeScalar {
   func isPrint() -> Bool
+}
+extension _StringCore : Collection {
+  var startIndex: Int {
+    get {}
+  }
+  var endIndex: Int {
+    get {}
+  }
+  func generate() -> IndexingGenerator<_StringCore>
+}
+extension _StringCore : Sliceable {
+}
+extension _StringCore {
+  typealias UTF8Chunk = UInt64
+  func _encodeSomeUTF8(i: Int) -> (Int, UTF8Chunk)
+  func _encodeSomeContiguousUTF16AsUTF8(i: Int) -> (Int, UTF8Chunk)
+  func _encodeSomeNonContiguousUTF16AsUTF8(i: Int) -> (Int, UTF8Chunk)
 }
 extension Array<T> : ArrayLiteralConvertible {
   static func convertFromArrayLiteral(elements: T...) -> Array<T>
@@ -4089,8 +4404,6 @@ extension Array<T> : ArrayType {
   var _elementStorageIfContiguous: UnsafePointer<T> {
     get {}
   }
-  func copy() -> Array<T>
-  func unshare()
   func reserveCapacity(minimumCapacity: Int)
   func append(newElement: T)
   func extend<S : Sequence where T == T>(sequence: S)
@@ -4101,6 +4414,7 @@ extension Array<T> : ArrayType {
   func join<S : Sequence where Array<T> == Array<T>>(elements: S) -> Array<T>
   func reduce<U>(initial: U, combine: (U, T) -> U) -> U
   func sort(isOrderedBefore: (T, T) -> Bool)
+  func sorted(isOrderedBefore: (T, T) -> Bool) -> Array<T>
   func map<U>(transform: (T) -> U) -> Array<U>
   func reverse() -> Array<T>
   func filter(includeElement: (T) -> Bool) -> Array<T>
@@ -4119,33 +4433,18 @@ extension Array<T> : Printable, DebugPrintable {
 }
 extension Array<T> {
   @transparent func _cPointerArgs() -> (AnyObject?, RawPointer)
-  @conversion @transparent func __conversion() -> CConstPointer<T>
-  @conversion @transparent func __conversion() -> CConstVoidPointer
 }
 extension Array<T> {
   func withUnsafePointerToElements<R>(body: (UnsafePointer<T>) -> R) -> R
+}
+extension Array<T> {
+  func withUnsafeMutableStorage<R>(body: (inout UnsafeMutableArray<T>) -> R) -> R
 }
 extension Array<T> {
   static func convertFromHeapArray(base: RawPointer, owner: NativeObject, count: Word) -> Array<T>
 }
 extension Array<T> {
   func replaceRange<C : Collection where T == T>(subRange: Range<Int>, with newValues: C)
-}
-extension _StringCore : Collection {
-  var startIndex: Int {
-    get {}
-  }
-  var endIndex: Int {
-    get {}
-  }
-  func generate() -> IndexingGenerator<_StringCore>
-}
-extension _StringCore : Sliceable {
-}
-extension _StringCore {
-  typealias UTF8Chunk = UInt64
-  func _encodeSomeUTF8(i: Int) -> (Int, UTF8Chunk)
-  func _encodeSomeUTF16AsUTF8(i: Int) -> (Int, UTF8Chunk)
 }
 extension UInt : Hashable {
   var hashValue: Int {
@@ -4158,15 +4457,15 @@ extension UInt : Printable {
   }
 }
 extension UInt : RandomAccessIndex {
-  @transparent func succ() -> UInt
-  @transparent func pred() -> UInt
+  @transparent func successor() -> UInt
+  @transparent func predecessor() -> UInt
   @transparent func distanceTo(other: UInt) -> Int
   @transparent func advancedBy(amount: Int) -> UInt
-  @transparent static func uncheckedAdd(lhs: UInt, _ rhs: UInt) -> (UInt, Bool)
-  @transparent static func uncheckedSubtract(lhs: UInt, _ rhs: UInt) -> (UInt, Bool)
-  @transparent static func uncheckedMultiply(lhs: UInt, _ rhs: UInt) -> (UInt, Bool)
-  @transparent static func uncheckedDivide(lhs: UInt, _ rhs: UInt) -> (UInt, Bool)
-  @transparent static func uncheckedModulus(lhs: UInt, _ rhs: UInt) -> (UInt, Bool)
+  @transparent static func addWithOverflow(lhs: UInt, _ rhs: UInt) -> (UInt, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: UInt, _ rhs: UInt) -> (UInt, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: UInt, _ rhs: UInt) -> (UInt, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: UInt, _ rhs: UInt) -> (UInt, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: UInt, _ rhs: UInt) -> (UInt, overflow: Bool)
   @transparent func toUIntMax() -> UIntMax
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: UIntMax) -> UInt
@@ -4193,8 +4492,11 @@ extension UInt {
   @transparent init(_ v: Double)
   @transparent init(_ v: Float80)
 }
+extension UInt : Reflectable {
+  func getMirror() -> Mirror
+}
 extension UInt : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension UInt32 : Hashable {
   var hashValue: Int {
@@ -4207,15 +4509,15 @@ extension UInt32 : Printable {
   }
 }
 extension UInt32 : RandomAccessIndex {
-  @transparent func succ() -> UInt32
-  @transparent func pred() -> UInt32
+  @transparent func successor() -> UInt32
+  @transparent func predecessor() -> UInt32
   @transparent func distanceTo(other: UInt32) -> Int
   @transparent func advancedBy(amount: Int) -> UInt32
-  @transparent static func uncheckedAdd(lhs: UInt32, _ rhs: UInt32) -> (UInt32, Bool)
-  @transparent static func uncheckedSubtract(lhs: UInt32, _ rhs: UInt32) -> (UInt32, Bool)
-  @transparent static func uncheckedMultiply(lhs: UInt32, _ rhs: UInt32) -> (UInt32, Bool)
-  @transparent static func uncheckedDivide(lhs: UInt32, _ rhs: UInt32) -> (UInt32, Bool)
-  @transparent static func uncheckedModulus(lhs: UInt32, _ rhs: UInt32) -> (UInt32, Bool)
+  @transparent static func addWithOverflow(lhs: UInt32, _ rhs: UInt32) -> (UInt32, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: UInt32, _ rhs: UInt32) -> (UInt32, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: UInt32, _ rhs: UInt32) -> (UInt32, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: UInt32, _ rhs: UInt32) -> (UInt32, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: UInt32, _ rhs: UInt32) -> (UInt32, overflow: Bool)
   @transparent func toUIntMax() -> UIntMax
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: UIntMax) -> UInt32
@@ -4249,7 +4551,7 @@ extension UInt32 {
   init(_ v: UnicodeScalar)
 }
 extension UInt32 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Optional<T> : Printable {
   var description: String {
@@ -4267,15 +4569,15 @@ extension UInt16 : Printable {
   }
 }
 extension UInt16 : RandomAccessIndex {
-  @transparent func succ() -> UInt16
-  @transparent func pred() -> UInt16
+  @transparent func successor() -> UInt16
+  @transparent func predecessor() -> UInt16
   @transparent func distanceTo(other: UInt16) -> Int
   @transparent func advancedBy(amount: Int) -> UInt16
-  @transparent static func uncheckedAdd(lhs: UInt16, _ rhs: UInt16) -> (UInt16, Bool)
-  @transparent static func uncheckedSubtract(lhs: UInt16, _ rhs: UInt16) -> (UInt16, Bool)
-  @transparent static func uncheckedMultiply(lhs: UInt16, _ rhs: UInt16) -> (UInt16, Bool)
-  @transparent static func uncheckedDivide(lhs: UInt16, _ rhs: UInt16) -> (UInt16, Bool)
-  @transparent static func uncheckedModulus(lhs: UInt16, _ rhs: UInt16) -> (UInt16, Bool)
+  @transparent static func addWithOverflow(lhs: UInt16, _ rhs: UInt16) -> (UInt16, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: UInt16, _ rhs: UInt16) -> (UInt16, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: UInt16, _ rhs: UInt16) -> (UInt16, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: UInt16, _ rhs: UInt16) -> (UInt16, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: UInt16, _ rhs: UInt16) -> (UInt16, overflow: Bool)
   @transparent func toUIntMax() -> UIntMax
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: UIntMax) -> UInt16
@@ -4310,7 +4612,12 @@ extension CodeUnit : StringElement {
   static func fromUTF16CodeUnit(utf16: CodeUnit) -> CodeUnit
 }
 extension UInt16 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
+}
+extension ConstUnsafePointer<T> : Printable {
+  var description: String {
+    get {}
+  }
 }
 extension Int : Hashable {
   var hashValue: Int {
@@ -4323,15 +4630,15 @@ extension Int : Printable {
   }
 }
 extension Int : RandomAccessIndex {
-  @transparent func succ() -> Int
-  @transparent func pred() -> Int
+  @transparent func successor() -> Int
+  @transparent func predecessor() -> Int
   @transparent func distanceTo(other: Int) -> Int
   @transparent func advancedBy(amount: Int) -> Int
-  @transparent static func uncheckedAdd(lhs: Int, _ rhs: Int) -> (Int, Bool)
-  @transparent static func uncheckedSubtract(lhs: Int, _ rhs: Int) -> (Int, Bool)
-  @transparent static func uncheckedMultiply(lhs: Int, _ rhs: Int) -> (Int, Bool)
-  @transparent static func uncheckedDivide(lhs: Int, _ rhs: Int) -> (Int, Bool)
-  @transparent static func uncheckedModulus(lhs: Int, _ rhs: Int) -> (Int, Bool)
+  @transparent static func addWithOverflow(lhs: Int, _ rhs: Int) -> (Int, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: Int, _ rhs: Int) -> (Int, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: Int, _ rhs: Int) -> (Int, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: Int, _ rhs: Int) -> (Int, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: Int, _ rhs: Int) -> (Int, overflow: Bool)
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: IntMax) -> Int
 }
@@ -4363,7 +4670,7 @@ extension Int : Reflectable {
   func getMirror() -> Mirror
 }
 extension Int : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Bool : LogicValue {
   @transparent func _getBuiltinLogicValue() -> Int1
@@ -4383,15 +4690,17 @@ extension Bool : Equatable, Hashable {
 extension Bool : Reflectable {
   func getMirror() -> Mirror
 }
-extension COpaquePointer {
-  @conversion @transparent func __conversion() -> CMutableVoidPointer
-  @conversion @transparent func __conversion() -> CConstVoidPointer
+extension Range<T> {
+  func map<U>(transform: (T) -> U) -> [U]
 }
 extension COpaquePointer {
   init<T>(_ from: UnsafePointer<T>)
 }
+extension COpaquePointer {
+  init<T>(_ from: CFunctionPointer<T>)
+}
 extension COpaquePointer : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Int32 : Hashable {
   var hashValue: Int {
@@ -4404,15 +4713,15 @@ extension Int32 : Printable {
   }
 }
 extension Int32 : RandomAccessIndex {
-  @transparent func succ() -> Int32
-  @transparent func pred() -> Int32
+  @transparent func successor() -> Int32
+  @transparent func predecessor() -> Int32
   @transparent func distanceTo(other: Int32) -> Int
   @transparent func advancedBy(amount: Int) -> Int32
-  @transparent static func uncheckedAdd(lhs: Int32, _ rhs: Int32) -> (Int32, Bool)
-  @transparent static func uncheckedSubtract(lhs: Int32, _ rhs: Int32) -> (Int32, Bool)
-  @transparent static func uncheckedMultiply(lhs: Int32, _ rhs: Int32) -> (Int32, Bool)
-  @transparent static func uncheckedDivide(lhs: Int32, _ rhs: Int32) -> (Int32, Bool)
-  @transparent static func uncheckedModulus(lhs: Int32, _ rhs: Int32) -> (Int32, Bool)
+  @transparent static func addWithOverflow(lhs: Int32, _ rhs: Int32) -> (Int32, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: Int32, _ rhs: Int32) -> (Int32, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: Int32, _ rhs: Int32) -> (Int32, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: Int32, _ rhs: Int32) -> (Int32, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: Int32, _ rhs: Int32) -> (Int32, overflow: Bool)
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: IntMax) -> Int32
 }
@@ -4444,7 +4753,7 @@ extension Int32 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Int32 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension Int16 : Hashable {
   var hashValue: Int {
@@ -4457,15 +4766,15 @@ extension Int16 : Printable {
   }
 }
 extension Int16 : RandomAccessIndex {
-  @transparent func succ() -> Int16
-  @transparent func pred() -> Int16
+  @transparent func successor() -> Int16
+  @transparent func predecessor() -> Int16
   @transparent func distanceTo(other: Int16) -> Int
   @transparent func advancedBy(amount: Int) -> Int16
-  @transparent static func uncheckedAdd(lhs: Int16, _ rhs: Int16) -> (Int16, Bool)
-  @transparent static func uncheckedSubtract(lhs: Int16, _ rhs: Int16) -> (Int16, Bool)
-  @transparent static func uncheckedMultiply(lhs: Int16, _ rhs: Int16) -> (Int16, Bool)
-  @transparent static func uncheckedDivide(lhs: Int16, _ rhs: Int16) -> (Int16, Bool)
-  @transparent static func uncheckedModulus(lhs: Int16, _ rhs: Int16) -> (Int16, Bool)
+  @transparent static func addWithOverflow(lhs: Int16, _ rhs: Int16) -> (Int16, overflow: Bool)
+  @transparent static func subtractWithOverflow(lhs: Int16, _ rhs: Int16) -> (Int16, overflow: Bool)
+  @transparent static func multiplyWithOverflow(lhs: Int16, _ rhs: Int16) -> (Int16, overflow: Bool)
+  @transparent static func divideWithOverflow(lhs: Int16, _ rhs: Int16) -> (Int16, overflow: Bool)
+  @transparent static func modulusWithOverflow(lhs: Int16, _ rhs: Int16) -> (Int16, overflow: Bool)
   @transparent func toIntMax() -> IntMax
   @transparent static func from(x: IntMax) -> Int16
 }
@@ -4497,14 +4806,14 @@ extension Int16 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Int16 : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension UTF16 {
   static func width(x: UnicodeScalar) -> Int
   static func leadSurrogate(x: UnicodeScalar) -> CodeUnit
   static func trailSurrogate(x: UnicodeScalar) -> CodeUnit
   static func copy<T : StringElement, U : StringElement>(source: UnsafePointer<T>, destination: UnsafePointer<U>, count: Int)
-  static func measure<Encoding : UnicodeCodec, Input : Generator where Encoding.CodeUnit == Encoding.CodeUnit>(_: Encoding.Type, input: Input) -> (Int, Bool)
+  static func measure<Encoding : UnicodeCodec, Input : Generator where Encoding.CodeUnit == Encoding.CodeUnit>(_: Encoding.Type, input: Input, repairIllFormedSequences: Bool) -> (Int, Bool)?
 }
 extension Double : Printable {
   var description: String {
@@ -4594,8 +4903,8 @@ extension Double {
   @transparent init(_ v: Float80)
 }
 extension Double : RandomAccessIndex {
-  @transparent func succ() -> Double
-  @transparent func pred() -> Double
+  @transparent func successor() -> Double
+  @transparent func predecessor() -> Double
   @transparent func distanceTo(other: Double) -> Int
   @transparent func advancedBy(amount: Int) -> Double
 }
@@ -4603,7 +4912,7 @@ extension Float64 : Reflectable {
   func getMirror() -> Mirror
 }
 extension Double : CVarArg {
-  func encode() -> Word[]
+  func encode() -> [Word]
 }
 extension ImplicitlyUnwrappedOptional<T> : Printable {
   var description: String {
@@ -4614,7 +4923,8 @@ extension ImplicitlyUnwrappedOptional<T> : _ConditionallyBridgedToObjectiveC {
   typealias ObjectiveCType = AnyObject
   static func getObjectiveCType() -> Any.Type
   func bridgeToObjectiveC() -> AnyObject
-  static func bridgeFromObjectiveC(x: AnyObject) -> T!?
+  static func bridgeFromObjectiveC(x: AnyObject) -> T!
+  static func bridgeFromObjectiveCConditional(x: AnyObject) -> T!?
   static func isBridgedToObjectiveC() -> Bool
 }
 extension Float80 : Printable {
@@ -4659,17 +4969,17 @@ extension Float80 {
   @transparent init(_ v: Double)
 }
 extension Float80 : RandomAccessIndex {
-  @transparent func succ() -> Float80
-  @transparent func pred() -> Float80
+  @transparent func successor() -> Float80
+  @transparent func predecessor() -> Float80
   @transparent func distanceTo(other: Float80) -> Int
   @transparent func advancedBy(amount: Int) -> Float80
 }
 extension Bit : IntegerArithmetic {
-  static func _withOverflow(x: Int, _ b: Bool) -> (Bit, Bool)
-  static func uncheckedAdd(lhs: Bit, _ rhs: Bit) -> (Bit, Bool)
-  static func uncheckedSubtract(lhs: Bit, _ rhs: Bit) -> (Bit, Bool)
-  static func uncheckedMultiply(lhs: Bit, _ rhs: Bit) -> (Bit, Bool)
-  static func uncheckedDivide(lhs: Bit, _ rhs: Bit) -> (Bit, Bool)
-  static func uncheckedModulus(lhs: Bit, _ rhs: Bit) -> (Bit, Bool)
+  static func _withOverflow(v: (Int, overflow: Bool)) -> (Bit, overflow: Bool)
+  static func addWithOverflow(lhs: Bit, _ rhs: Bit) -> (Bit, overflow: Bool)
+  static func subtractWithOverflow(lhs: Bit, _ rhs: Bit) -> (Bit, overflow: Bool)
+  static func multiplyWithOverflow(lhs: Bit, _ rhs: Bit) -> (Bit, overflow: Bool)
+  static func divideWithOverflow(lhs: Bit, _ rhs: Bit) -> (Bit, overflow: Bool)
+  static func modulusWithOverflow(lhs: Bit, _ rhs: Bit) -> (Bit, overflow: Bool)
   func toIntMax() -> IntMax
 }
