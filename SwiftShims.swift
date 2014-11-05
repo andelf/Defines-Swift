@@ -1,29 +1,48 @@
+@exported import Darwin.C.stddef
 @exported import Darwin.C.stdint
 @exported import Darwin.C.stdint
 struct HeapObject {
   var metadata: COpaquePointer
   var refCount: UInt32
   var weakRefCount: UInt32
-  init(metadata: COpaquePointer, refCount: UInt32, weakRefCount: UInt32)
 }
 struct _SwiftNSFastEnumerationState {
-  var state: CUnsignedLong
-  var itemsPtr: UnsafePointer<AnyObject?>
-  var mutationsPtr: UnsafePointer<CUnsignedLong>
-  var extra: (CUnsignedLong, CUnsignedLong, CUnsignedLong, CUnsignedLong, CUnsignedLong)
-  init(state: CUnsignedLong, itemsPtr: UnsafePointer<AnyObject?>, mutationsPtr: UnsafePointer<CUnsignedLong>, extra: (CUnsignedLong, CUnsignedLong, CUnsignedLong, CUnsignedLong, CUnsignedLong))
+  var state: UInt
+  var itemsPtr: AutoreleasingUnsafeMutablePointer<AnyObject?>
+  var mutationsPtr: UnsafeMutablePointer<UInt>
+  var extra: (UInt, UInt, UInt, UInt, UInt)
 }
 struct _SwiftNSRange {
   var location: Int
   var length: Int
-  init(location: Int, length: Int)
 }
-var RC_INTERVAL_SHIFT: CInt {
+var _swift_stdlib_ExtendedGraphemeClusterNoBoundaryRulesMatrix: UnsafePointer<UInt16>
+var _swift_stdlib_GraphemeClusterBreakPropertyTrie: UnsafePointer<UInt8>
+let _swift_stdlib_GraphemeClusterBreakPropertyTrieMetadata: _swift_stdlib_GraphemeClusterBreakPropertyTrieMetadataTy
+struct _swift_stdlib_GraphemeClusterBreakPropertyTrieMetadataTy {
+  var BMPFirstLevelIndexBits: UInt32
+  var BMPDataOffsetBits: UInt32
+  var SuppFirstLevelIndexBits: UInt32
+  var SuppSecondLevelIndexBits: UInt32
+  var SuppDataOffsetBits: UInt32
+  var BMPLookupBytesPerEntry: UInt32
+  var BMPDataBytesPerEntry: UInt32
+  var SuppLookup1BytesPerEntry: UInt32
+  var SuppLookup2BytesPerEntry: UInt32
+  var SuppDataBytesPerEntry: UInt32
+  var TrieSize: UInt32
+  var BMPLookupBytesOffset: UInt32
+  var BMPDataBytesOffset: UInt32
+  var SuppLookup1BytesOffset: UInt32
+  var SuppLookup2BytesOffset: UInt32
+  var SuppDataBytesOffset: UInt32
+}
+var RC_INTERVAL: Int32 {
   get {
     return
   }
 }
-var RC_INTERVAL: CInt {
+var RC_INTERVAL_SHIFT: Int32 {
   get {
     return
   }
