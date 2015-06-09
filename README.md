@@ -1,25 +1,22 @@
 # Swift Module Defines
 
-Dumped by press Command and Click module name(in import statement) in Xcode.
-
-AppKit module is only available at MACOS, not in IOS.
-
-Many Libraries only avialiable in IOS.
+THIS only refects defines in MacOSX.
 
 ## hiden features
 
-- @transparent means inline
-- @conversion __conversion means implicitly type conversion
+- <del>@transparent means inline</del>
+- <del>@conversion __conversion means implicitly type conversion</del>
 
 ## My Notes and Analysis
 
 [Notes](http://andelf.github.io)
 
-
 ## Notes
 
 - Swift: standard library
 - SwiftShims: type compatiablity helper module
+- ObjectiveC: bridge
+- simd: the simd lib
 - Darwin: /usr/include libs ( c standard library )
 
 
