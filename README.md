@@ -2,6 +2,11 @@
 
 THIS only refects defines in MacOSX.
 
+**This is deprecated!** Please refer [apple/swift](https://github.com/apple/swift).
+
+In detail, the ``swift/stdlib/public/SDK/`` folder.
+
+
 ## hiden features
 
 - <del>@transparent means inline</del>
